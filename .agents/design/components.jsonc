@@ -601,7 +601,7 @@
     },
     {
       "name": "ComposerPickerOptions",
-      "note": "Representative single-select flyout for the subtle composer pickers (model, session, reasoning-effort). Ships as a WinUI Flyout of RadioMenuItem rows on a `surface` (CardBackgroundFillColorDefault) sheet with 12px (`lg`) overlay corners (ChatPickerFlyoutStyle, #1459) and `md` shadow. Each row reserves a leading glyph column; the selected row shows an `accent` Segoe Fluent Icons CheckMark (glyph U+E73E, WinUI SymbolThemeFontFamily selection glyph, not a radio dot) while unselected rows keep the column empty so labels stay aligned. The check glyph carries a font-family-only raw style because the icon font is outside the display/body/mono token set (documented as the `icon` typography family in design.json); color stays token-bound to `accent`. Selecting a row closes the flyout; reopening restores defaults. Because `on.click.open` targets take no props, this shows a representative model list; the real model picker (AutoSuggestBox over a grouped ListView) and the effort slider/gauge are supplied by the app and are a Reactor port note.",
+      "note": "Representative single-select flyout for the subtle composer pickers (model, session, reasoning-effort). Ships as a WinUI Flyout of RadioMenuItem rows on a `surface` (CardBackgroundFillColorDefault) sheet with 12px (`lg`) overlay corners (ChatPickerFlyoutStyle, #1459) and `md` shadow. Rows have 4px (`sm`) corners and full-row hover/pressed fills through `subtleHover`/`subtlePressed` (SubtleFillColorSecondary/Tertiary, the light/dark MenuFlyoutItem state resources). Pointer exit restores transparent fill without changing selection or geometry. Each row reserves a 16px leading glyph column; the selected row keeps its `accent` Segoe Fluent Icons CheckMark (U+E73E), not a radio dot. The check uses the existing 12px Fluent-glyph typography token, without raw style overriding its width or color. High-contrast subtle fills remain transparent under the current token contract; native MenuFlyout system-highlight overrides are not reproduced. This preview retains a representative checked row, not persistent model selection. Because `on.click.open` targets take no props, all triggers show the same representative model list; the searchable model flyout and effort slider/gauge remain app behavior.",
       "root": {
         "id": "composer-picker-options",
         "el": "div",
@@ -614,8 +614,14 @@
             "el": "label",
             "attrs": { "role": "menuitemradio", "aria-checked": "true" },
             "layout": { "mode": "horizontal", "gap": "2", "align": "center", "padding": { "x": "2", "y": "1" } },
+            "appearance": { "background": "$none", "radius": "sm" },
+            "states": {
+              "hover": { "background": "subtleHover" },
+              "pressed": { "background": "subtlePressed" },
+              "hoverPressed": { "background": "subtlePressed" }
+            },
             "children": [
-              { "id": "composer-option-sonnet-check", "el": "span", "attrs": { "aria-hidden": "true", "style": "font-family:'Segoe Fluent Icons','Segoe MDL2 Assets',sans-serif" }, "layout": { "width": 16 }, "appearance": { "color": "accent", "textAlign": "center" }, "children": ["\uE73E"] },
+              { "id": "composer-option-sonnet-check", "el": "span", "attrs": { "aria-hidden": "true" }, "layout": { "width": 16 }, "appearance": { "textStyle": "chatChevron", "color": "accent", "textAlign": "center" }, "children": ["\uE73E"] },
               "Claude Sonnet 5"
             ]
           },
@@ -624,6 +630,12 @@
             "el": "label",
             "attrs": { "role": "menuitemradio", "aria-checked": "false" },
             "layout": { "mode": "horizontal", "gap": "2", "align": "center", "padding": { "x": "2", "y": "1" } },
+            "appearance": { "background": "$none", "radius": "sm" },
+            "states": {
+              "hover": { "background": "subtleHover" },
+              "pressed": { "background": "subtlePressed" },
+              "hoverPressed": { "background": "subtlePressed" }
+            },
             "children": [
               { "id": "composer-option-opus-check", "el": "span", "attrs": { "aria-hidden": "true" }, "layout": { "width": 16 } },
               "Claude Opus 4.8"
@@ -634,6 +646,12 @@
             "el": "label",
             "attrs": { "role": "menuitemradio", "aria-checked": "false" },
             "layout": { "mode": "horizontal", "gap": "2", "align": "center", "padding": { "x": "2", "y": "1" } },
+            "appearance": { "background": "$none", "radius": "sm" },
+            "states": {
+              "hover": { "background": "subtleHover" },
+              "pressed": { "background": "subtlePressed" },
+              "hoverPressed": { "background": "subtlePressed" }
+            },
             "children": [
               { "id": "composer-option-gpt-check", "el": "span", "attrs": { "aria-hidden": "true" }, "layout": { "width": 16 } },
               "GPT-5.6"

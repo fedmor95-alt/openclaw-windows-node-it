@@ -829,6 +829,8 @@ The catalog is organized into four families. Colophon's left navigation includes
 
 Every interactive control documents its hover and pressed states; static controls say so. States bind Fluent resources (`SubtleFillColorSecondary` for hover, `SubtleFillColorTertiary` for pressed, accent variants for primary actions), never raw hex.
 
+ComposerPickerOptions rows use full-row `subtleHover` and `subtlePressed` fills with `sm` corners, both in the catalog and in opened composer flyouts. Pointer exit restores transparency; hover never changes the checked row, accent checkmark or layout. These tokens stay transparent in high contrast, so the preview does not reproduce native MenuFlyout system-highlight overrides.
+
 - **Basic controls.** Button (primary/standard/subtle), SubtleButton (native default style), HyperlinkButton, TextBox, Field, Badge, ToggleSwitch, StatusDot, Avatar, InfoBar, and Card. TextBox is the reusable default WinUI single-line input. Field composes a label and TextBox; its Gateway address example passes the label and placeholder into that shared control.
 - **Setup.** SetupProgressIndicator, RecommendedBadge, ProviderArtwork, SetupOptionCard, CapabilityOptionRow, SetupPhaseStatus, and the SetupWizardShell frame, ported from `OpenClaw.SetupEngine.UI`.
 - **Chat.** ChatBubble (assistant prose), ChatUserBubble (sent user message), ChatComposer, ChatThread, ComposerPicker, ComposerPickerOptions, and ChatCopyButton, plus the native workspace identity controls (AgentIdentityBadge, UserIdentityBadge), ConnectionStatusFlyout, NotificationFlyout, WorkspaceShell, and ExampleScreen. See the Chat surface and Workspace shell sections.
