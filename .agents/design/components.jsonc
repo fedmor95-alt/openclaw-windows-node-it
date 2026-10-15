@@ -539,7 +539,7 @@
     },
     {
       "name": "ComposerPicker",
-      "note": "Subtle inline dropdown. Ships as a WinUI subtle DropDownButton (a transparent Button that opens a flyout), NOT a bordered ComboBox and NOT a Fluent-web pill/segmented control. Shows the current value in `muted` secondary text (TextFillColorSecondary) with a trailing `muted` chevron (Segoe Fluent \\uE70D, previewed ~10px). 32px min height; horizontal padding token `2`, gap token `1`; `sm` radius = WinUI ControlCornerRadius (4px). It is a real `button` whose browser chrome is removed with `control.chrome:none`, so the transparent WinUI rest state (SubtleFillColorTransparent, `$none`) shows with no web button border, and `control.focus` supplies the Windows accent focus rectangle instead of a web focus ring. Hover uses `subtleHover` (SubtleFillColorSecondary) and press uses `subtlePressed` (SubtleFillColorTertiary) through `states`, so the picker stays quiet in the composer toolbar and never competes with the primary Send action. When there is nothing to choose (for example the session picker with a single session) the picker is disabled and its value reads a shade lighter than the enabled muted text. Used for the model, reasoning-effort, and session selectors; `on.click` opens the picker flyout. Since #1459 the model picker is a native flyout with an AutoSuggestBox over a grouped, single-selection ListView, and the reasoning-effort picker is a native discrete slider with a compact gauge trigger (`ChatEffortGauge`, rendered with WinUI paths, not a font glyph) at narrow widths; a picker trigger value can tint with `ChatPickerAccentBrush`. The session selector stays a single-select flyout. ComposerPickerOptions is a representative shared option list because flyout targets take no props; the real per-picker option sets (sessions, models, effort levels) are supplied by the app and are a Reactor port note.",
+      "note": "ReactorChatComposer.PickerButton at production 9e4999c6: a native Button with toolbar resource overrides, not a ComboBox. Native label 13px, ChevronDown U+E70D at 12px, 4px label-to-chevron gap, 8px horizontal and 4px vertical padding, 32px minimum height, 4px corners and no border. ChatSecondaryTextBrush supplies rest text. Model and effort are right-aligned in Workspace; only standalone ChatWindow includes a session trigger. The browser opens a representative option list, not the production searchable model flyout or effort slider. Native label trimming, 44px compact targets and the narrow effort gauge remain port requirements.",
       "props": {
         "label": "Model"
       },
@@ -556,16 +556,17 @@
           "gap": "1",
           "padding": {
             "left": "2",
-            "right": "2"
+            "right": "2",
+            "top": "1",
+            "bottom": "1"
           },
           "align": "center",
           "height": 32,
           "width": "hug"
         },
         "appearance": {
-          "fontFamily": "body",
-          "textStyle": "small",
-          "color": "muted",
+          "textStyle": "chatPicker",
+          "color": "chatSecondary",
           "background": "$none",
           "radius": "sm"
         },
@@ -574,10 +575,10 @@
           "focus": { "kind": "outline", "color": "accent" }
         },
         "states": {
-          "hover": { "background": "subtleHover" },
-          "pressed": { "background": "subtlePressed" },
-          "hoverPressed": { "background": "subtlePressed" },
-          "disabled": { "color": "muted", "background": "$none" }
+          "hover": { "background": "subtleHover", "color": "subtleButtonHoverText" },
+          "pressed": { "background": "subtlePressed", "color": "subtleButtonPressedText" },
+          "hoverPressed": { "background": "subtlePressed", "color": "subtleButtonPressedText" },
+          "disabled": { "color": "disabledText", "background": "$none" }
         },
         "on": { "click": { "open": "ComposerPickerOptions" } },
         "children": [
@@ -590,30 +591,10 @@
           },
           {
             "id": "composer-picker-chevron",
-            "el": "svg",
-            "attrs": {
-              "width": "12",
-              "height": "12",
-              "viewBox": "0 0 24 24",
-              "fill": "none",
-              "aria-hidden": "true",
-              "stroke": "currentColor",
-              "stroke-width": "2",
-              "stroke-linecap": "round",
-              "stroke-linejoin": "round"
-            },
-            "appearance": {
-              "color": "muted"
-            },
-            "children": [
-              {
-                "id": "composer-picker-chevron-path",
-                "el": "path",
-                "attrs": {
-                  "d": "M6 9l6 6 6-6"
-                }
-              }
-            ]
+            "el": "span",
+            "attrs": { "aria-hidden": "true" },
+            "appearance": { "textStyle": "chatChevron" },
+            "children": [ "\uE70D" ]
           }
         ]
       }
@@ -663,11 +644,13 @@
     },
     {
       "name": "ChatBubble",
-      "note": "Assistant chat turn: a 36×36 avatar (subtle `surface` fill, hairline `controlLine` border, `pill` radius) to the LEFT of plain prose that flows in the reading column with NO bubble, card, border, or fill (#1459). The refreshed assistant turn is bubbleless: only the user's own message rides a soft bubble (see ChatThread), so the transcript reads like a document rather than facing chat cards. Prose binds `ChatTextBrush` (`ink`) at body type (14/21 in-app); top-level blocks use one uniform 16px gap (token 3). Inline code and fenced code still get their own `ChatCardBrush` surfaces with `ChatSecondaryTextBrush` code text and a `bubble` (12px) radius, and the Copy action confirms with a `ChatCopySuccessBrush` checkmark that announces Copied and resets after two seconds. Footer reads timestamp · usage · Copy · Read aloud — Copy and Read aloud are hover-gated 20×20 subtle icon buttons in-app, and usage is the used/context (pct%) string ChatUsageFormatter produces. Mirrors ReactorChatTimeline's assistant row; ships via Reactor. Reading column max-width 768px, 16px prose inset, and the avatar hiding below 960px are Reactor port notes (no token equivalent). (This previews the assistant variant; the user variant rides the softer `ChatUserBrush` bubble on the right.)",
+      "note": "Bubbleless assistant turn from ReactorChatTimeline and ChatMarkdownPresentation at production 9e4999c6. This reference shows the below-960px chat viewport variant without an avatar, at the 736px prose cap (768 minus two 16px insets). Native prose is 14/21, with 16px between blocks and 4px vertical content padding. The footer is sender, time, model and usage at 12/18, followed by 32x32 Copy and Read aloud controls with 14px Fluent glyphs. Copy is always visible. Read aloud previews the native 70% resting opacity through chatReadAloudText, returning to full alpha over the button; native row-level hover is not represented. Native avatars appear in a separate 44px gutter above the 960px breakpoint; do not replace the production logo with an invented sparkle. ChatTextBrush and ChatSecondaryTextBrush preserve alpha. The native source remains authoritative for Markdown, responsive layout, clipboard and speech behavior.",
       "props": {
+        "sender": "Assistant",
         "time": "2:14 PM",
+        "model": "browse",
         "usage": "12.5K/200K (6%)",
-        "children": "Paired to the gateway — 6 Windows node capabilities are live."
+        "children": "FIXTURE MAIN: the lighthouse is green."
       },
       "root": {
         "id": "chat-bubble-root",
@@ -675,58 +658,18 @@
         "layout": {
           "mode": "horizontal",
           "gap": "2",
-          "align": "start"
+          "align": "start",
+          "width": 736
         },
         "children": [
-          {
-            "id": "chat-bubble-avatar",
-            "el": "div",
-            "attrs": {
-              "aria-hidden": "true"
-            },
-            "layout": {
-              "mode": "horizontal",
-              "align": "center",
-              "justify": "center",
-              "width": 36,
-              "height": 36
-            },
-            "appearance": {
-              "background": "surface",
-              "borderColor": "controlLine",
-              "color": "muted",
-              "radius": "pill"
-            },
-            "children": [
-              {
-                "id": "chat-bubble-avatar-glyph",
-                "el": "svg",
-                "attrs": {
-                  "width": "18",
-                  "height": "18",
-                  "viewBox": "0 0 24 24",
-                  "fill": "currentColor",
-                  "aria-hidden": "true"
-                },
-                "children": [
-                  {
-                    "id": "chat-bubble-avatar-path",
-                    "el": "path",
-                    "attrs": {
-                      "d": "M12 2.5l1.7 5.1a4 4 0 0 0 2.7 2.7l5.1 1.7-5.1 1.7a4 4 0 0 0-2.7 2.7L12 21.5l-1.7-5.1a4 4 0 0 0-2.7-2.7L2.5 12l5.1-1.7a4 4 0 0 0 2.7-2.7L12 2.5z"
-                    }
-                  }
-                ]
-              }
-            ]
-          },
           {
             "id": "chat-bubble-stack",
             "el": "div",
             "layout": {
               "mode": "vertical",
               "gap": "1",
-              "align": "start"
+              "align": "start",
+              "grow": true
             },
             "children": [
               {
@@ -734,12 +677,13 @@
                 "el": "div",
                 "layout": {
                   "mode": "vertical",
-                  "gap": "3"
+                  "gap": "4",
+                  "padding": { "y": "1" },
+                  "width": "fill"
                 },
                 "appearance": {
-                  "fontFamily": "body",
-                  "textStyle": "body",
-                  "color": "ink"
+                  "textStyle": "chatProse",
+                  "color": "chatText"
                 },
                 "children": [
                   "{children}"
@@ -750,104 +694,32 @@
                 "el": "div",
                 "layout": {
                   "mode": "horizontal",
-                  "gap": "2",
-                  "padding": {
-                    "x": "2"
-                  },
+                  "gap": "1",
                   "align": "center"
                 },
+                "margin": { "top": "1" },
                 "appearance": {
-                  "fontFamily": "body",
-                  "textStyle": "caption",
-                  "color": "muted"
+                  "textStyle": "chatFooter",
+                  "color": "chatSecondary"
                 },
                 "children": [
                   {
-                    "id": "chat-bubble-time",
+                    "id": "chat-bubble-identity",
                     "el": "span",
+                    "margin": { "right": "1" },
                     "children": [
-                      "{time}"
-                    ]
-                  },
-                  {
-                    "id": "chat-bubble-dot",
-                    "el": "span",
-                    "attrs": {
-                      "aria-hidden": "true"
-                    },
-                    "children": [
-                      "·"
-                    ]
-                  },
-                  {
-                    "id": "chat-bubble-usage",
-                    "el": "span",
-                    "children": [
-                      "{usage}"
+                      "{sender} · {time} · {model} · {usage}"
                     ]
                   },
                   {
                     "id": "chat-bubble-copy",
-                    "el": "div",
-                    "attrs": {
-                      "role": "button",
-                      "title": "Copy",
-                      "aria-label": "Copy message"
-                    },
-                    "layout": {
-                      "mode": "horizontal",
-                      "align": "center",
-                      "justify": "center",
-                      "width": 20,
-                      "height": 20
-                    },
-                    "appearance": {
-                      "color": "muted",
-                      "radius": "sm"
-                    },
-                    "children": [
-                      {
-                        "id": "chat-bubble-copy-glyph",
-                        "el": "svg",
-                        "attrs": {
-                          "width": "14",
-                          "height": "14",
-                          "viewBox": "0 0 24 24",
-                          "fill": "none",
-                          "aria-hidden": "true",
-                          "stroke": "currentColor",
-                          "stroke-width": "2",
-                          "stroke-linecap": "round",
-                          "stroke-linejoin": "round"
-                        },
-                        "children": [
-                          {
-                            "id": "chat-bubble-copy-rect",
-                            "el": "rect",
-                            "attrs": {
-                              "x": "9",
-                              "y": "9",
-                              "width": "11",
-                              "height": "11",
-                              "rx": "2"
-                            }
-                          },
-                          {
-                            "id": "chat-bubble-copy-path",
-                            "el": "path",
-                            "attrs": {
-                              "d": "M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"
-                            }
-                          }
-                        ]
-                      }
-                    ]
+                    "component": "ChatCopyButton"
                   },
                   {
                     "id": "chat-bubble-readaloud",
-                    "el": "div",
+                    "el": "button",
                     "attrs": {
-                      "role": "button",
+                      "type": "button",
                       "title": "Read aloud",
                       "aria-label": "Read message aloud"
                     },
@@ -855,44 +727,28 @@
                       "mode": "horizontal",
                       "align": "center",
                       "justify": "center",
-                      "width": 20,
-                      "height": 20
+                      "width": 32,
+                      "height": 32,
+                      "padding": "0"
                     },
                     "appearance": {
-                      "color": "muted",
+                      "color": "chatReadAloudText",
+                      "background": "$none",
                       "radius": "sm"
+                    },
+                    "control": { "chrome": "none", "focus": { "kind": "outline", "color": "accent" } },
+                    "states": {
+                      "hover": { "background": "subtleHover", "color": "chatSecondary" },
+                      "pressed": { "background": "chatReadAloudPressed", "color": "chatSecondary" },
+                      "hoverPressed": { "background": "chatReadAloudPressed", "color": "chatSecondary" }
                     },
                     "children": [
                       {
                         "id": "chat-bubble-readaloud-glyph",
-                        "el": "svg",
-                        "attrs": {
-                          "width": "14",
-                          "height": "14",
-                          "viewBox": "0 0 24 24",
-                          "fill": "none",
-                          "aria-hidden": "true",
-                          "stroke": "currentColor",
-                          "stroke-width": "2",
-                          "stroke-linecap": "round",
-                          "stroke-linejoin": "round"
-                        },
-                        "children": [
-                          {
-                            "id": "chat-bubble-readaloud-poly",
-                            "el": "polygon",
-                            "attrs": {
-                              "points": "11 5 6 9 2 9 2 15 6 15 11 19 11 5"
-                            }
-                          },
-                          {
-                            "id": "chat-bubble-readaloud-path",
-                            "el": "path",
-                            "attrs": {
-                              "d": "M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"
-                            }
-                          }
-                        ]
+                        "el": "span",
+                        "attrs": { "aria-hidden": "true" },
+                        "appearance": { "textStyle": "chatActionIcon" },
+                        "children": [ "\uE767" ]
                       }
                     ]
                   }
@@ -904,13 +760,37 @@
       }
     },
     {
+      "name": "ChatUserBubble",
+      "note": "Sent user bubble from ReactorChatTimeline.BuildUser at production 9e4999c6. Native ChatUserBrush is the system accent at 8% in Light and 12% in Dark, not a solid blue card. Text uses ChatUserTextBrush (primary text; highlight text in HC), 14/21, with 16px horizontal and 12px vertical padding, no stroke and 12px corners. The native width is content-sized and capped at 720px. The shared 32px Copy action sits below with 8px of stack spacing plus the native 2px top and 4px trailing margin, preserving the measured 10px gap for a sent message. Hover-only native metadata and queued-message states are not reproduced by this sent-message reference.",
+      "props": { "children": "Can we browse the synthetic Gateway?" },
+      "root": {
+        "id": "chat-user-root",
+        "el": "div",
+        "layout": { "mode": "vertical", "gap": "2", "align": "end", "width": "hug" },
+        "children": [
+          {
+            "id": "chat-user-surface",
+            "el": "div",
+            "layout": { "mode": "vertical", "gap": "2", "padding": { "x": "4", "y": "3" } },
+            "appearance": { "textStyle": "chatProse", "background": "chatUser", "color": "chatUserText", "radius": "bubble" },
+            "children": [ "{children}" ]
+          },
+          {
+            "id": "chat-user-copy",
+            "component": "ChatCopyButton",
+            "margin": { "top": "half", "right": "1" }
+          }
+        ]
+      }
+    },
+    {
       "name": "ChatComposer",
-      "note": "Chat input. A rounded `control` panel (`composer` radius, 20px) with a hairline `controlLine` border wrapping a borderless, transparent, auto-growing textarea over a toolbar. In-app it binds `ChatComposerBrush` (card fill) over the transparent chat canvas and `ChatStrokeBrush` for the hairline; Send is the Fluent ChatSubmit up glyph (U+E74A) that swaps to Stop (U+E71A) during an active turn, and Add uses ChatAttach (U+E710) (#1459). Left cluster = Add, session picker, model picker, reasoning-effort picker; right cluster = Voice (mic) and the primary Send/Stop. Production exposes only Voice and Send/Stop on the right (no separate Speaker or Settings composer buttons; read-aloud and chat preferences live in Settings, per docs/CHAT_VISUAL_DESIGN.md). Only Send spends the accent (it swaps to a subtle Stop while a turn is active, and reads disabled/greyed until the textarea has content); every other control ships as a WinUI subtle transparent Button (SubtleFillColorTransparent rest, SubtleFillColorSecondary hover, SubtleFillColorTertiary press, ControlCornerRadius) with a `muted` (TextFillColorSecondary) glyph, so the toolbar reads as quiet chrome. Each picker (see ComposerPicker) is a subtle borderless dropdown with muted value text; a picker with nothing to choose (for example the session picker when only one session exists) renders disabled, so its label reads a shade lighter than its enabled neighbours, as with `Main session` in the preview. Textarea min 56 / max 200px growth and the 12px outer margin are Reactor port notes; the app tightens top padding to 2px below token 1. The subtle icon controls are real `button`s whose browser chrome is removed via `control.chrome:none`, so the transparent WinUI rest state (SubtleFillColorTransparent, `$none`) shows with no web button border; each carries `states` for hover (`subtleHover`) and press (`subtlePressed`) and a `control.focus` accent focus rectangle, and only the filled Send spends the accent. The message input renders as a borderless, typeable `contenteditable` `role=textbox` showing the muted placeholder; `control.chrome:none` removes the browser field chrome and its `:focus` ring, and `control.focus` (kind underline, color accent) substitutes the Windows bottom accent underline a real WinUI TextBox shows. The hairline `controlLine` border belongs to the outer `control` panel only. (Preview shows the rest state with the placeholder visible; click to type.)",
+      "note": "Workspace composer from ReactorChatComposer at production 9e4999c6, measured against the Release app and fixture Gateway. Reference width 768px, resting outer height 112px, 20px radius, 1px ChatStrokeBrush, native alpha-preserving ChatComposerBrush card fill. Inner padding is 16,12,16,8; input is at least 44px tall with 16px text and no padding, fill, border or accent underline, including focus. Stack gap 8px. Attach is the native paperclip U+E723, not Add. Workspace omits the session selector; model and effort align right before Voice and circular 32px Send. Toolbar glyphs are native 16px Segoe Fluent Icons. Preview contains a draft so Send is enabled; typing does not send, auto-grow, or update Send eligibility. Empty/disabled, Stop, narrow gauge, native flyouts and dynamic input behavior remain production responsibilities. At native widths <=560 effort uses a 44px gauge; the installed renderer cannot express that responsive switch. The reading cap, 40px/12px outer gutters and 12px vertical margin belong to the host, not this isolated writing-surface component.",
       "props": {
         "placeholder": "Message Assistant (Enter to send)",
-        "session": "Main session",
-        "model": "Claude Sonnet 5",
-        "effort": "Default"
+        "draft": "Draft for visual comparison",
+        "model": "Fixture Browse",
+        "effort": "off"
       },
       "root": {
         "id": "chat-composer-root",
@@ -918,41 +798,44 @@
         "layout": {
           "mode": "vertical",
           "gap": "2",
-          "padding": "2",
-          "width": "fill"
+          "padding": { "left": "4", "top": "3", "right": "4", "bottom": "2" },
+          "width": 768,
+          "height": 112
         },
-        "margin": "3",
         "appearance": {
-          "background": "control",
-          "borderColor": "controlLine",
+          "background": "chatSurface",
+          "borderColor": "chatStroke",
+          "borderWidth": 1,
           "radius": "composer"
         },
         "children": [
           {
             "id": "chat-composer-input",
-            "el": "div",
+            "el": "textarea",
             "attrs": {
-              "contenteditable": "true",
-              "role": "textbox",
-              "aria-multiline": "true",
-              "aria-label": "Message input"
+              "placeholder": "{placeholder}",
+              "aria-label": "Message input",
+              "rows": "2"
             },
             "layout": {
-              "padding": "2",
+              "padding": "0",
               "width": "fill",
-              "height": 56
+              "height": 44
             },
+            "margin": "0",
             "appearance": {
-              "fontFamily": "body",
-              "textStyle": "body",
-              "color": "muted"
+              "textStyle": "chatInput",
+              "color": "chatText",
+              "background": "$none",
+              "borderWidth": 0,
+              "radius": "$none"
             },
             "control": {
               "chrome": "none",
-              "focus": { "kind": "underline", "color": "accent" }
+              "focus": { "kind": "outline", "color": "chatCanvas" }
             },
             "children": [
-              "{placeholder}"
+              "{draft}"
             ]
           },
           {
@@ -980,18 +863,19 @@
                     "el": "button",
                     "attrs": {
                       "type": "button",
-                      "title": "Add context",
-                      "aria-label": "Add context"
+                      "title": "Attach",
+                      "aria-label": "Attach"
                     },
                     "layout": {
                       "mode": "horizontal",
                       "align": "center",
                       "justify": "center",
+                      "padding": "0",
                       "width": 32,
                       "height": 32
                     },
                     "appearance": {
-                      "color": "muted",
+                      "color": "chatSecondary",
                       "background": "$none",
                       "radius": "sm"
                     },
@@ -1007,50 +891,12 @@
                     "children": [
                       {
                         "id": "chat-composer-add-glyph",
-                        "el": "svg",
-                        "attrs": {
-                          "width": "18",
-                          "height": "18",
-                          "viewBox": "0 0 24 24",
-                          "fill": "none",
-                          "aria-hidden": "true",
-                          "stroke": "currentColor",
-                          "stroke-width": "2",
-                          "stroke-linecap": "round",
-                          "stroke-linejoin": "round"
-                        },
-                        "children": [
-                          {
-                            "id": "chat-composer-add-path",
-                            "el": "path",
-                            "attrs": {
-                              "d": "M12 5v14M5 12h14"
-                            }
-                          }
-                        ]
+                        "el": "span",
+                        "attrs": { "aria-hidden": "true" },
+                        "appearance": { "textStyle": "chatIcon" },
+                        "children": [ "\uE723" ]
                       }
                     ]
-                  },
-                  {
-                    "id": "chat-composer-session",
-                    "component": "ComposerPicker",
-                    "props": {
-                      "label": "{session}"
-                    }
-                  },
-                  {
-                    "id": "chat-composer-model",
-                    "component": "ComposerPicker",
-                    "props": {
-                      "label": "{model}"
-                    }
-                  },
-                  {
-                    "id": "chat-composer-effort",
-                    "component": "ComposerPicker",
-                    "props": {
-                      "label": "{effort}"
-                    }
                   }
                 ]
               },
@@ -1059,10 +905,19 @@
                 "el": "div",
                 "layout": {
                   "mode": "horizontal",
-                  "gap": "2",
+                  "gap": "1",
                   "align": "center"
                 },
                 "children": [
+                  {
+                    "id": "chat-composer-pickers",
+                    "el": "div",
+                    "layout": { "mode": "horizontal", "gap": "0", "align": "center" },
+                    "children": [
+                      { "id": "chat-composer-model", "component": "ComposerPicker", "props": { "label": "{model}" } },
+                      { "id": "chat-composer-effort", "component": "ComposerPicker", "props": { "label": "{effort}" } }
+                    ]
+                  },
                   {
                     "id": "chat-composer-mic",
                     "el": "button",
@@ -1075,11 +930,12 @@
                       "mode": "horizontal",
                       "align": "center",
                       "justify": "center",
+                      "padding": "0",
                       "width": 32,
                       "height": 32
                     },
                     "appearance": {
-                      "color": "muted",
+                      "color": "chatSecondary",
                       "background": "$none",
                       "radius": "sm"
                     },
@@ -1095,45 +951,16 @@
                     "children": [
                       {
                         "id": "chat-composer-mic-glyph",
-                        "el": "svg",
-                        "attrs": {
-                          "width": "18",
-                          "height": "18",
-                          "viewBox": "0 0 24 24",
-                          "fill": "none",
-                          "aria-hidden": "true",
-                          "stroke": "currentColor",
-                          "stroke-width": "2",
-                          "stroke-linecap": "round",
-                          "stroke-linejoin": "round"
-                        },
-                        "children": [
-                          {
-                            "id": "chat-composer-mic-rect",
-                            "el": "rect",
-                            "attrs": {
-                              "x": "9",
-                              "y": "3",
-                              "width": "6",
-                              "height": "11",
-                              "rx": "3"
-                            }
-                          },
-                          {
-                            "id": "chat-composer-mic-path",
-                            "el": "path",
-                            "attrs": {
-                              "d": "M5 11a7 7 0 0 0 14 0M12 18v3"
-                            }
-                          }
-                        ]
+                        "el": "span",
+                        "attrs": { "aria-hidden": "true" },
+                        "appearance": { "textStyle": "chatIcon" },
+                        "children": [ "\uE720" ]
                       }
                     ]
                   },
                   {
                     "id": "chat-composer-send",
                     "el": "button",
-                    "class": "ds-btn",
                     "attrs": {
                       "type": "button",
                       "title": "Send",
@@ -1143,38 +970,29 @@
                       "mode": "horizontal",
                       "align": "center",
                       "justify": "center",
+                      "padding": "0",
                       "width": 32,
                       "height": 32
                     },
                     "appearance": {
                       "background": "accent",
                       "color": "accentInk",
-                      "radius": "sm"
+                      "radius": "pill"
+                    },
+                    "control": { "chrome": "none", "focus": { "kind": "outline", "color": "accent" } },
+                    "states": {
+                      "hover": { "background": "chatActionHover" },
+                      "pressed": { "background": "chatActionPressed", "color": "chatActionPressedText" },
+                      "hoverPressed": { "background": "chatActionPressed", "color": "chatActionPressedText" },
+                      "disabled": { "background": "chatActionDisabled", "color": "chatActionDisabledText" }
                     },
                     "children": [
                       {
                         "id": "chat-composer-send-glyph",
-                        "el": "svg",
-                        "attrs": {
-                          "width": "18",
-                          "height": "18",
-                          "viewBox": "0 0 24 24",
-                          "fill": "none",
-                          "aria-hidden": "true",
-                          "stroke": "currentColor",
-                          "stroke-width": "2",
-                          "stroke-linecap": "round",
-                          "stroke-linejoin": "round"
-                        },
-                        "children": [
-                          {
-                            "id": "chat-composer-send-path",
-                            "el": "path",
-                            "attrs": {
-                              "d": "M12 19V5M5 12l7-7 7 7"
-                            }
-                          }
-                        ]
+                        "el": "span",
+                        "attrs": { "aria-hidden": "true" },
+                        "appearance": { "textStyle": "chatIcon" },
+                        "children": [ "\uE74A" ]
                       }
                     ]
                   }
@@ -1187,15 +1005,17 @@
     },
     {
       "name": "ChatThread",
-      "note": "A short thread: the \"does chat hang together\" check — a user turn (softer `accentSubtle` bubble on the right, with a hover Copy) and a bubbleless assistant turn (avatar + plain prose + Copy / Read aloud / context-usage readout), then the composer. Only the user's own message rides a bubble; the assistant turn flows as plain prose in the reading column (#1459). In-app the user bubble binds `ChatUserBrush` (accent at low opacity) with `ChatUserTextBrush`, and the footer follows the refreshed model and reasoning-effort pickers. Thread max-width 768px and the user bubble cap 720px are Reactor port notes.",
+      "note": "Fixture-shaped composition of the shared ChatUserBubble, bubbleless ChatBubble and Workspace ChatComposer. The 848px reference frame includes two 40px host gutters around the 768px reading column; transcript prose has a further 16px inset. It paints the native content layer once, with transparent chat content and translucent card/user surfaces above it. Actual Mica depends on the desktop, activation and transparency settings, so the browser's neutral backplate is not an exact wallpaper-dependent Mica reproduction. Native timeline virtualization, anchored composer placement and responsive gutters remain host behavior.",
       "root": {
         "id": "chat-thread-root",
         "el": "div",
         "layout": {
           "mode": "vertical",
           "gap": "3",
-          "width": "fill"
+          "width": 848,
+          "padding": { "x": "chatGutter", "y": "4" }
         },
+        "appearance": { "background": "chatLayer" },
         "children": [
           {
             "id": "chat-thread-user",
@@ -1203,133 +1023,23 @@
             "layout": {
               "mode": "horizontal",
               "justify": "end",
-              "width": "fill"
+              "width": "fill",
+              "padding": { "x": "4" }
             },
             "children": [
               {
-                "id": "chat-thread-user-stack",
-                "el": "div",
-                "layout": {
-                  "mode": "vertical",
-                  "gap": "1",
-                  "align": "end"
-                },
-                "children": [
-                  {
-                    "id": "chat-thread-user-bubble",
-                    "el": "div",
-                    "layout": {
-                      "mode": "vertical",
-                      "padding": {
-                        "x": "4",
-                        "y": "3"
-                      }
-                    },
-                    "appearance": {
-                      "fontFamily": "body",
-                      "textStyle": "body",
-                      "background": "accentSubtle",
-                      "color": "accentInk",
-                      "radius": "bubble"
-                    },
-                    "children": [
-                      "Can you list the Windows node capabilities?"
-                    ]
-                  },
-                  {
-                    "id": "chat-thread-user-footer",
-                    "el": "div",
-                    "layout": {
-                      "mode": "horizontal",
-                      "gap": "2",
-                      "padding": {
-                        "x": "2"
-                      },
-                      "align": "center"
-                    },
-                    "appearance": {
-                      "fontFamily": "body",
-                      "textStyle": "caption",
-                      "color": "muted"
-                    },
-                    "children": [
-                      {
-                        "id": "chat-thread-user-time",
-                        "el": "span",
-                        "children": [
-                          "2:14 PM"
-                        ]
-                      },
-                      {
-                        "id": "chat-thread-user-copy",
-                        "el": "div",
-                        "attrs": {
-                          "role": "button",
-                          "title": "Copy",
-                          "aria-label": "Copy message"
-                        },
-                        "layout": {
-                          "mode": "horizontal",
-                          "align": "center",
-                          "justify": "center",
-                          "width": 20,
-                          "height": 20
-                        },
-                        "appearance": {
-                          "color": "muted",
-                          "radius": "sm"
-                        },
-                        "children": [
-                          {
-                            "id": "chat-thread-user-copy-glyph",
-                            "el": "svg",
-                            "attrs": {
-                              "width": "14",
-                              "height": "14",
-                              "viewBox": "0 0 24 24",
-                              "fill": "none",
-                              "aria-hidden": "true",
-                              "stroke": "currentColor",
-                              "stroke-width": "2",
-                              "stroke-linecap": "round",
-                              "stroke-linejoin": "round"
-                            },
-                            "children": [
-                              {
-                                "id": "chat-thread-user-copy-rect",
-                                "el": "rect",
-                                "attrs": {
-                                  "x": "9",
-                                  "y": "9",
-                                  "width": "11",
-                                  "height": "11",
-                                  "rx": "2"
-                                }
-                              },
-                              {
-                                "id": "chat-thread-user-copy-path",
-                                "el": "path",
-                                "attrs": {
-                                  "d": "M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"
-                                }
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
+                "id": "chat-thread-user-bubble",
+                "component": "ChatUserBubble"
               }
             ]
           },
           {
             "id": "chat-thread-assistant",
             "component": "ChatBubble",
+            "margin": { "x": "4", "y": "3" },
             "props": {
-              "time": "2:14 PM",
-              "usage": "12.5K/200K (6%)",
-              "children": "Paired to the gateway — 6 capabilities are live, including system.run and clipboard access."
+              "time": "11:01 PM",
+              "usage": "200/128.0K (0%)"
             }
           },
           {
@@ -1341,7 +1051,7 @@
     },
     {
       "name": "ChatCopyButton",
-      "note": "Chat control. The quiet copy affordance on assistant messages and code blocks (ChatCopyButton). A 32x32 subtle button (token `8` square target) with 4px (`1`) padding and `sm` radius, sharing the composer toolbar's subtle state set: transparent rest (SubtleFillColorTransparent), hover SubtleFillColorSecondary (`subtleHover`), pressed SubtleFillColorTertiary (`subtlePressed`). Idle glyph is Segoe Fluent Copy (U+E8C8) in `ChatSecondaryTextBrush` (`muted`). On copy it flips to the CheckMark (U+E73E) in `ChatCopySuccessBrush` (`positive`), announces \"Copied\" through a polite live region, and resets after 2 seconds; a failure shows SystemFillColorCritical (`critical`). Previewed in the idle state.",
+      "note": "Shared native ChatCopyButton for user turns, assistant turns and code. 32x32 target, 4px padding, 4px corners, no border, and the 14px Segoe Fluent Copy glyph U+E8C8. Rest foreground is ChatSecondaryTextBrush. Native clipboard confirmation changes to Check U+E73E, announces Copied and resets after two seconds; clipboard behavior is not implemented by the preview. Hover, press, disabled and focus visuals are represented.",
       "root": {
         "id": "chat-copy-root",
         "el": "button",
@@ -1359,7 +1069,7 @@
           "height": 32
         },
         "appearance": {
-          "color": "muted",
+          "color": "chatSecondary",
           "background": "$none",
           "radius": "sm"
         },
@@ -1368,18 +1078,19 @@
           "focus": { "kind": "outline", "color": "accent" }
         },
         "states": {
-          "hover": { "background": "subtleHover" },
-          "pressed": { "background": "subtlePressed" },
-          "hoverPressed": { "background": "subtlePressed" }
+          "hover": { "background": "subtleHover", "color": "subtleButtonHoverText" },
+          "pressed": { "background": "subtlePressed", "color": "subtleButtonPressedText" },
+          "hoverPressed": { "background": "subtlePressed", "color": "subtleButtonPressedText" },
+          "disabled": { "background": "$none", "color": "disabledText" }
         },
         "children": [
           {
             "id": "chat-copy-glyph",
             "el": "span",
             "attrs": {
-              "aria-hidden": "true",
-              "style": "font-family:'Segoe Fluent Icons','Segoe MDL2 Assets',sans-serif;font-size:16px"
+              "aria-hidden": "true"
             },
+            "appearance": { "textStyle": "chatActionIcon" },
             "children": [ "\uE8C8" ]
           }
         ]
