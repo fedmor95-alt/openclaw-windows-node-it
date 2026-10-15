@@ -181,6 +181,26 @@ typography:
     fontSize: 12px
     fontWeight: 400
     lineHeight: 12px
+  workspaceTitle:
+    fontFamily: '"Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif'
+    fontSize: 12px
+    fontWeight: 400
+    lineHeight: 16px
+  workspacePerson:
+    fontFamily: '"Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif'
+    fontSize: 10.08px
+    fontWeight: 400
+    lineHeight: 1
+  workspaceCaption:
+    fontFamily: '"Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif'
+    fontSize: 10px
+    fontWeight: 400
+    lineHeight: 10px
+  workspacePlaceholder:
+    fontFamily: '"Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif'
+    fontSize: 48px
+    fontWeight: 400
+    lineHeight: 48px
 spacing:
   "0": 0px
   half: 2px
@@ -201,6 +221,7 @@ spacing:
   infoTextTop: 14px
   infoIconGap: 14px
   chatGutter: 40px
+  workspaceSelectorEnd: 28px
 rounded:
   sm: 4px
   md: 8px
@@ -208,6 +229,7 @@ rounded:
   bubble: 12px
   composer: 20px
   pill: 999px
+  workspaceContent: 8px 0 0 0
 x-colophon:
   version: 1
   tokens:
@@ -812,13 +834,19 @@ The Colophon catalog now uses the actual geometry, semantic alpha brushes and Fl
 
 ## Workspace shell
 
-The landing window is the native Home and Sessions workspace (`Windows/WorkspaceWindow.xaml`, shipped in #1541). It is a Mica window with a title bar, a 256px left `NavigationView` pane, and a content host that mounts the Reactor chat. Settings remains an independent native companion window.
+The landing window is the native Home and Sessions workspace (`Windows/WorkspaceWindow.xaml`, shipped in #1541). The reference is reconciled against production commit `dc9f6345821075362580bd598cc32e4f2aa6a18a` and the supplied 125%-scale screenshot. It shows that screenshot's expanded, no-agent/no-session state, Owner / Error footer and one notification, not invented connected conversations. It is a Mica window with a 32px title bar, a 256px left `NavigationView` pane, and a content host that mounts the Reactor chat when connected. Settings remains an independent native companion window.
 
-- **Pane.** The `NavigationViewExpandedPaneBackground` reveals Mica. The PaneHeader stacks a Back/Forward toolbar of subtle icon buttons over a transparent assistant selector (a borderless `ComboBox` rendering the selected agent through `AgentIdentityBadge`, with a New agent option that carries the `add` glyph U+E710). The menu lists a Home item, then a Sessions header whose inline add button starts a conversation, then one reusable row per session. Selected nav and session rows use the native subtle selection background with a leading `accent` indicator; rows use the `sm` (ControlCornerRadius) corners.
-- **Owner footer.** The PaneFooter pairs an Owner button with a Notifications bell. The Owner button is the `UserIdentityBadge`: it reads the authenticated `users.self` profile as a display name over a live connection-status caption, with a small connection status dot to the left of that caption (the same `positive` / `warning` / `critical` / `muted` states as the connection flyout, never color alone). It falls back honestly to Owner / Disconnected when no profile is available and never encodes authorization state. The bell shows an `InfoBadge` count and opens the notifications flyout.
+- **Pane and toolbar.** The `NavigationViewExpandedPaneBackground` reveals Mica; there is no extra pane border or general 8px inset. PaneHeader margin is 4,8,4,8. The 40x40 pane button sits at x=4, y=8 below the title bar. Back/Forward align to the right of the same 40px toolbar with an 8px gap and the default SubtleButton padding, yielding 40px widths. Their disabled state represents empty navigation history. The selector sits 8px below the toolbar, with 4,8,28,8 padding and a trailing 12px U+E70D glyph. It shows No agents loaded until production has a roster; selected agents use `AgentIdentityBadge`.
+- **Menu.** Home is a 36px row with 4px horizontal and 2px vertical outer margins, a 3x16 accent indicator and the original `Chat.svg` at 22px centered in a 24px column. The iconless native presenter reserves 8px before that column, followed by a 16px gap to Home. The Sessions header is 40px tall with 16px leading and 4px trailing insets, 14px semibold text, and a 40x36 add button. No conversations to show replaces session rows in the supplied state; add is disabled while disconnected.
+- **Owner footer.** The PaneFooter uses 4,8,4,8 margins and a 4px column gap. The Owner button is the shared `UserIdentityBadge`, with native SubtleButton states, 8px padding and a retained 1px border, a 24px PersonPicture, 12px column spacing and a 10px status dot followed by a 4px gap and Caption text. `statusTone` follows connection state, never authorization. It reads the authenticated `users.self` profile or falls back to Owner. The notification button is 40x36 with 8px padding, vertically centered against Owner, containing the original 20px `Notifications.svg` and a 16px InfoBadge offset -6px above and 8px beyond the icon's right edge.
 - **Connection status.** `Controls/GatewayStatusContent.xaml` is a 304px flyout of Gateway, Operator, and Node rows split by 1px `line` dividers, closing with an Open Connection link. Each row pairs a 10px status dot with a body-strong label over a caption `muted` detail, and reveals an `accent` action link (Reconnect, Approve) only when that layer needs one. The dot binds the Fluent system fill for its state: `positive` connected, `warning` attention, `critical` error, `muted` unknown, never color alone.
 - **Notifications.** `Controls/NotificationFlyoutContent.xaml` is a 352px flyout: a Clear all link, a list of notification cards, and a footer pairing Open notifications with an active-count caption. Each card is a `surface` panel with a 1px `line` border, `md` (8px) corners, and 12px padding, laying out a leading severity glyph, a title/message/metadata stack, and a dismiss button; a recurrence count rides a `warning` badge beside the title. An empty state swaps the list for one centered card.
-- **Sidebar glyphs.** Pane and toolbar glyphs are Segoe Fluent Icons or the SVGs under `Assets/SidebarIcons` (Chat, Sessions, Notifications, Connection, and the Settings destinations). Toolbar aliases include Back U+E76B, Forward U+E76C, add U+E710, toggle pane U+E90C, dismiss U+E711, and the Ringer notifications glyph U+EA8F.
+- **Artwork and glyphs.** Pane, Back, Forward and Add use actual Segoe Fluent glyphs U+E90C, U+E76B, U+E76C and U+E710 at 16px, not hand-drawn SVG substitutes. Home and Notifications use exact production SVG bytes, including their authored gradients; these are artwork, not theme-color tokens. The title uses `BrandAssets.RedBotMarkUri` at 16px with a 16px gap before its 12px title. Native caption glyph references are U+E921, U+E922 and U+E8BB. The owner fallback uses PersonPicture's Contact glyph U+E77B at 24 * 0.42 = 10.08px.
+- **Content.** One `NavigationViewContentBackground` layer uses `chatLayer`, with a 1px top/left `line` stroke and the native 8,0,0,0 corner shape (`workspaceContent`). The disconnected placeholder is centered: U+E8F2 at 48px, Subtitle text, and the standard 32px Open Connection button, separated by 12px gaps.
+
+Workspace button instances reuse SubtleButton's resource-bound states rather than a generic `muted` foreground. The added `workspaceTitle`, `workspacePerson` and `workspacePlaceholder` typography tokens preserve native title, PersonPicture and empty-state metrics. `workspaceSelectorEnd` records the 28px native selector padding.
+
+This is a production-structure and geometry reference, not a pixel-identity claim. The supplied screenshot's client is approximately 1266x852 effective pixels; the preview uses that height and follows its available width. Mica's wallpaper tint, font rasterization, OS caption actions and native NavigationView interaction cannot be reproduced by this renderer. The pane button has hover/pressed/focus styling, but collapse/reopen remains a native action: production hides the pane entirely, shows a 56px ReopenPaneSlot, and transfers focus. Do not approximate that behavior by shrinking focusable children to zero width. The preview notification button opens the shared illustrative flyout; it does not read live notifications.
 
 ## Components
 
@@ -850,9 +878,11 @@ Colophon's browser preview retains limitations: its body line box is 20px rather
 
 ### Native ToggleSwitch, PersonPicture, and InfoBar references
 
-`ToggleSwitch` remains a **static track reference**, not a working switch, pending interactive renderer support. Keep one shared component rather than a gallery of static interaction states. The [native template](https://github.com/microsoft/microsoft-ui-xaml/blob/main/controls/dev/CommonStyles/ToggleSwitch_themeresources.xaml) uses a 40x20 track, a 12x12 resting/disabled knob, a 14x14 pointer-over knob, and a 17x14 pressed knob. The full native control also owns its header, On/Off content, 12px track-to-content gap, 10px pre/post margins, and 154px minimum width; these are not part of the isolated track.
+`ToggleSwitch` is one **interactive shared control**, not a gallery of static states. Each rendered instance starts On and owns an independent transient `checked` boolean; click, Space, or Enter toggles it and updates `aria-checked` without writing to the design file. `SettingsToggleRow` reuses this control and passes its title as the accessible name. Set the `disabled` prop to `"true"` to prevent activation, or use the canvas's Disabled preview state. The [native template](https://github.com/microsoft/microsoft-ui-xaml/blob/main/controls/dev/CommonStyles/ToggleSwitch_themeresources.xaml) uses a 40x20 track, a 12x12 resting/disabled knob, a 14x14 pointer-over knob, and a 17x14 pressed knob. The full native control also owns its header, On/Off content, 12px track-to-content gap, 10px pre/post margins, and 154px minimum width; these are not part of the isolated track.
 
-On/Off movement is native `RepositionThemeAnimation` with a 20px endpoint displacement and template-calculated `KnobOnToOffOffset` / `KnobOffToOnOffset`. Pointer-over/pressed knob resizing uses `ControlFasterAnimationDuration` (83ms) and `ControlFastOutSlowInKeySpline` (0,0,0,1); disabled resizing uses `ControlNormalAnimationDuration` (250ms). Preserve WinUI's Dragging transitions and system animation settings rather than replacing them with the general motion guideline. The installed Colophon renderer cannot persist checked state, animate geometry, or express these transitions. The remaining reference does not prove animation, dragging, keyboard switching, or the on-knob `CircleElevationBorderBrush`.
+On/Off movement uses a separate 20x20 carrier with 20px travel. Colophon's WinUI reposition reference is 367ms cubic-bezier(0.1,0.9,0.2,1); thumb resizing independently uses `ControlFasterAnimationDuration` (83ms) and `ControlFastOutSlowInKeySpline` (0,0,0,1), or `ControlNormalAnimationDuration` (250ms) when disabled. These platform-specific timings intentionally override the general 120-200ms motion guideline. The browser respects `prefers-reduced-motion` by suppressing both transitions. Resting knob bounds are x=3.5 (Off) or x=23.5 (On), y=4, preserving the native half-pixel margins. Hover keeps each knob center; pressed alignment changes the bounds to x=3 (Off) or x=20 (On), y=3.
+
+Track and knob states bind the `toggle*`, `accent`, and `accentInk` resource tokens in all three preview themes. Off track fill/stroke changes use the native 83ms linear color transition; On brushes change discretely rather than inheriting Colophon's generic 160ms transition. The disabled Off knob reuses `disabledText`, the `TextFillColorDisabledBrush` alias used by native `ToggleSwitchKnobFillOffDisabled`. The preview requires the persistent-state and geometry-transition support merged into [Colophon](https://github.com/karkarl/colophon/commit/d3cd63899410ead81b2aab2b99135dffe9037035). It supports interruption and reversal, but does not reproduce native dragging, template-calculated reposition offsets, system focus visuals, or the on-knob `CircleElevationBorderBrush`. Shipping WinUI must keep its stock template and system animation settings; the browser graph is not a replacement control implementation.
 
 `Avatar` follows [DefaultPersonPictureStyle](https://github.com/microsoft/microsoft-ui-xaml/blob/main/controls/dev/PersonPicture/PersonPicture.xaml): 96x96 by default, a 1px ellipse stroke, `PersonPictureEllipseFillThemeBrush`, and semibold initials sized to `max(1, diameter * 0.42)`. At the default size this is 40.32px, not a 13px body label. `AvatarStates` also shows the native Contact (U+E77B) and People (U+E716) fallbacks. PersonPicture is non-interactive and has no hover/pressed states; an enclosing button owns those. Production 32px and 24px usages are size overrides, not the default. Native photo clipping, initials generation, badge layout, and `TextLineBounds=Tight` remain native behavior, not browser parity claims.
 
