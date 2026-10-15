@@ -51,8 +51,54 @@
       }
     },
     {
+      "name": "TextBox",
+      "note": "Basic control. Reusable default WinUI single-line TextBox, matching the stock control used by DirectUrlBox in Pages/ConnectionPage.xaml. Body text is 14px, the preview is 32px high with sm (4px) corners, and TextControlThemePadding is preserved exactly as 10,5,6,6 through named spacing tokens. Normal uses control/ink, pointer-over uses controlHover, and disabled uses controlDisabled/disabledText. The input has no separate native Pressed visual state: pressed previews retain pointer-over fill, while actual focus draws the 2px accent underline through control.focus. The browser uses controlLine as a flat approximation of TextControlElevationBorderBrush; native focused fill and the clear-button template remain owned by WinUI. Port as Microsoft.UI.Xaml.Controls.TextBox without replacing its template.",
+      "props": {
+        "accessibleName": "Text",
+        "placeholder": "Enter text"
+      },
+      "root": {
+        "id": "textbox-input",
+        "el": "input",
+        "attrs": {
+          "type": "text",
+          "aria-label": "{accessibleName}",
+          "placeholder": "{placeholder}"
+        },
+        "layout": {
+          "padding": {
+            "left": "textControlLeft",
+            "top": "textControlTop",
+            "right": "textControlEnd",
+            "bottom": "textControlEnd"
+          },
+          "width": "fill",
+          "height": 32
+        },
+        "appearance": {
+          "fontFamily": "body",
+          "textStyle": "body",
+          "color": "ink",
+          "background": "control",
+          "borderColor": "controlLine",
+          "borderWidth": 1,
+          "radius": "sm"
+        },
+        "control": {
+          "chrome": "none",
+          "focus": { "kind": "underline", "color": "accent" }
+        },
+        "states": {
+          "hover": { "background": "controlHover" },
+          "pressed": { "background": "controlHover" },
+          "hoverPressed": { "background": "controlHover" },
+          "disabled": { "color": "disabledText", "background": "controlDisabled" }
+        }
+      }
+    },
+    {
       "name": "Field",
-      "note": "Basic control. Text input with a quiet label above it — the field is the subject. The input ships as the default WinUI TextBox: `control` fill (ControlFillColorDefault), `controlLine` hairline border (ControlStrokeColorDefault), `ink` text, `sm` radius. Hover = ControlFillColorSecondary (no exact token; previewed with `control`, documented here). Focus draws the Fluent accent underline, previewed as a `accent` bottom border via `states.focus`. Disabled = ControlFillColorDisabled with `muted` text. Input padding mirrors WinUI TextControlThemePadding (10,5,6,6), snapped to tokens 2 (8≈10/6 horizontal) and 1 (4≈5/6 vertical). In-app MinHeight 32px lines a field up with a Button on the same row; that minimum stays a port note. Focus draws the Fluent accent underline, supplied here by `control.focus` (accent rectangle); the OFF-grid hover tint (ControlFillColorSecondary) has no exact token and previews with `control`.",
+      "note": "Basic composition. A visible label above the shared TextBox control, separated by token 2 (8px), equivalent to a stock WinUI TextBox with Header and PlaceholderText. The Gateway address example passes its label as the TextBox accessible name and its placeholder through props. All input geometry and interaction states belong to TextBox, so this field and its instances stay aligned with the default control.",
       "props": {
         "label": "Gateway address",
         "placeholder": "127.0.0.1:18789"
@@ -71,38 +117,21 @@
             "id": "field-label",
             "el": "span",
             "class": "ds-field-label",
+            "appearance": {
+              "fontFamily": "body",
+              "textStyle": "body",
+              "color": "ink"
+            },
             "children": [
               "{label}"
             ]
           },
           {
             "id": "field-input",
-            "el": "input",
-            "class": "ds-input",
-            "attrs": {
+            "component": "TextBox",
+            "props": {
+              "accessibleName": "{label}",
               "placeholder": "{placeholder}"
-            },
-            "layout": {
-              "padding": {
-                "x": "2",
-                "y": "1"
-              },
-              "width": "fill"
-            },
-            "appearance": {
-              "fontFamily": "body",
-              "textStyle": "body",
-              "color": "ink",
-              "background": "control",
-              "borderColor": "controlLine",
-              "radius": "sm"
-            },
-            "control": {
-              "focus": { "kind": "outline", "color": "accent" }
-            },
-            "states": {
-              "hover": { "background": "control" },
-              "disabled": { "color": "muted", "background": "control" }
             }
           }
         ]
@@ -110,7 +139,7 @@
     },
     {
       "name": "Card",
-      "note": "Content card. Flat by default — a 1px hairline border, not a drop shadow. Padding mirrors the WinUI Gallery card (16,12) as tokens 4 (16) and 3 (12) exactly, with the `md` radius and a `line`-colored border supplied by the ds-card class. Never nest a card inside a card.",
+      "note": "Content card. Flat by default: a 1px hairline border, not a drop shadow. Padding mirrors the WinUI Gallery card (16,12) as tokens 4 (16) and 3 (12) exactly, with the `md` radius and a `line`-colored border supplied by the ds-card class. The title binds `subtitle` (SubtitleTextBlockStyle, 20/28 SemiBold) and the description binds `body` (BodyTextBlockStyle, 14/20 Regular). Open report composes the shared HyperlinkButton, including its body typography and hover, pressed, disabled, and focus states. The card itself is static; only its action is interactive. Never nest a card inside a card.",
       "props": {
         "title": "Windows node",
         "body": "Paired · 6 capabilities exposed over MCP."
@@ -133,6 +162,11 @@
             "id": "card-title",
             "el": "h3",
             "class": "ds-card-title",
+            "appearance": {
+              "fontFamily": "display",
+              "textStyle": "subtitle",
+              "color": "ink"
+            },
             "children": [
               "{title}"
             ]
@@ -141,23 +175,24 @@
             "id": "card-body",
             "el": "p",
             "class": "ds-card-body",
+            "appearance": {
+              "fontFamily": "body",
+              "textStyle": "body",
+              "color": "muted"
+            },
             "children": [
               "{body}"
             ]
           },
           {
             "id": "card-link",
-            "el": "a",
-            "class": "ds-link",
-            "attrs": {
-              "href": "#"
+            "component": "HyperlinkButton",
+            "props": {
+              "children": "Open report"
             },
             "margin": {
               "top": "1"
-            },
-            "children": [
-              "Open report →"
-            ]
+            }
           }
         ]
       }
@@ -189,27 +224,36 @@
     },
     {
       "name": "SubtleButton",
-      "note": "Basic control. The quiet icon button used across the workspace chrome and flyouts (WinUI SubtleButtonStyle): Back/Forward, New session, pane toggle, notification bell, and the flyout dismiss button. Transparent rest (SubtleFillColorTransparent, `$none`) with a glyph in `ink`; hover = SubtleFillColorSecondary (`subtleHover`), pressed = SubtleFillColorTertiary (`subtlePressed`), disabled = ControlFillColorDisabled with `muted` glyph. `sm` radius (ControlCornerRadius). Previewed at the workspace command size 40x40 with a 16px glyph (WorkspaceWindow.xaml uses Width/Height 40, FontSize 16); the notification dismiss variant is 30x30 with an 11px glyph and 6px padding. `control.chrome:none` removes the web button border so the transparent Windows rest state shows, and `control.focus` draws the accent focus rectangle. Glyph shown is New session (Segoe Fluent Add, U+E710).",
+      "note": "Basic control. Default WinUI SubtleButtonStyle, not the workspace's fixed-size icon variant. Uses native ButtonPadding 11,5,11,6 (left, top, right, bottom), a retained 1px ButtonBorderThemeThickness, sm (4px) ControlCornerRadius, and normal-weight 14px text. Width and height follow content; the style itself sets no 40x40 dimensions. Background, border, and foreground bind SubtleButton-specific normal, pointer-over, pressed, and disabled resources, including high-contrast overrides. Preview hover/pressed border tokens are transparent in light/dark: CSS paints the fill under the border, so adding the translucent native border again would produce an incorrect dark rim. High-contrast borders and keyboard focus remain visible. Disabled fill and border resolve to the same values as rest; disabled text uses TextFillColorDisabledBrush, not muted. Port with Style={StaticResource SubtleButtonStyle}, leaving the native template intact rather than copying the browser border compensation. Browser limitations: body uses a 20px line box; native system focus (FocusVisualMargin=-3) and the 83ms background transition are not reproduced by Colophon's shared renderer. Workspace icon sizing and padding overrides belong to usage variants.",
       "props": {
-        "label": "New session"
+        "label": "Subtle button"
       },
       "root": {
         "id": "subtle-button-root",
         "el": "button",
         "attrs": {
-          "type": "button",
-          "aria-label": "{label}"
+          "type": "button"
         },
         "layout": {
           "mode": "horizontal",
           "align": "center",
           "justify": "center",
-          "width": 40,
-          "height": 40
+          "padding": {
+            "left": "buttonHorizontal",
+            "top": "buttonTop",
+            "right": "buttonHorizontal",
+            "bottom": "buttonBottom"
+          },
+          "width": "hug",
+          "height": "hug"
         },
         "appearance": {
-          "color": "ink",
-          "background": "$none",
+          "fontFamily": "body",
+          "textStyle": "body",
+          "color": "subtleButtonText",
+          "background": "subtleButtonFill",
+          "borderColor": "subtleButtonBorder",
+          "borderWidth": 1,
           "radius": "sm"
         },
         "control": {
@@ -217,23 +261,13 @@
           "focus": { "kind": "outline", "color": "accent" }
         },
         "states": {
-          "hover": { "background": "subtleHover" },
-          "pressed": { "background": "subtlePressed" },
-          "hoverPressed": { "background": "subtlePressed" },
-          "disabled": { "color": "muted", "background": "$none" }
+          "hover": { "color": "subtleButtonHoverText", "background": "subtleButtonHoverFill", "borderColor": "subtleButtonHoverBorder" },
+          "pressed": { "color": "subtleButtonPressedText", "background": "subtleButtonPressedFill", "borderColor": "subtleButtonPressedBorder" },
+          "hoverPressed": { "color": "subtleButtonPressedText", "background": "subtleButtonPressedFill", "borderColor": "subtleButtonPressedBorder" },
+          "disabled": { "color": "subtleButtonDisabledText", "background": "subtleButtonFill", "borderColor": "subtleButtonBorder" }
         },
         "children": [
-          {
-            "id": "subtle-button-glyph",
-            "el": "span",
-            "attrs": {
-              "aria-hidden": "true",
-              "style": "font-family:'Segoe Fluent Icons','Segoe MDL2 Assets',sans-serif;font-size:16px"
-            },
-            "children": [
-              "\uE710"
-            ]
-          }
+          "{label}"
         ]
       }
     },
@@ -282,48 +316,43 @@
     },
     {
       "name": "ToggleSwitch",
-      "note": "Basic control. The stock WinUI ToggleSwitch used on settings and permission rows. Previewed in the ON state: track fills `accent` (AccentFillColorDefault / ToggleSwitchFillOn) with an `accentInk` (TextOnAccentFillColorPrimary) thumb pushed right. OFF state (documented as a port note): track is `control` (ControlFillColorDefault) with a `controlLine` border and a `muted`/ControlStrongFill thumb at left. Hover = AccentFillColorSecondary on (ControlFillColorSecondary off); pressed = AccentFillColorTertiary on (ControlFillColorTertiary off); disabled uses the Fluent disabled track. Track previewed at 40x20 with a `pill` radius and a 14px circular thumb; the thumb/track visuals are WinUI template parts and are a port note. Toggle-state brushes are stock Fluent resources, not locally remapped.",
+      "note": "Basic control. Static WinUI ToggleSwitch track reference, shown On for the existing settings composition pending interactive renderer support. Native geometry is 40x20 with a 12x12 resting knob, 14x14 pointer-over knob, and 17x14 pressed knob. Props describe a frozen snapshot, not live state. Colophon cannot persist checked state or animate geometry, so this is an image rather than a misleading non-working switch button. Native On/Off uses RepositionThemeAnimation with 20px travel; resizing uses 83ms and spline 0,0,0,1, except Disabled at 250ms. Full header/content layout, dragging, focus, keyboard switching, and CircleElevationBorderBrush remain native behavior. See DESIGN.md for bindings and limitations.",
       "props": {
-        "label": "Launch at startup"
+        "label": "On, normal. Static ToggleSwitch reference.",
+        "trackFill": "accent",
+        "trackStroke": "toggleOnStroke",
+        "knobFill": "accentInk",
+        "knobX": 23.5,
+        "knobY": 4,
+        "knobWidth": 12,
+        "knobHeight": 12
       },
       "root": {
         "id": "toggle-switch-root",
-        "el": "button",
+        "el": "svg",
         "attrs": {
-          "type": "button",
-          "role": "switch",
-          "aria-checked": "true",
+          "viewBox": "0 0 40 20",
+          "width": 40,
+          "height": 20,
+          "role": "img",
           "aria-label": "{label}"
         },
-        "layout": {
-          "mode": "horizontal",
-          "align": "center",
-          "justify": "end",
-          "padding": { "x": "1" },
-          "width": 40,
-          "height": 20
-        },
-        "appearance": {
-          "background": "accent",
-          "radius": "pill"
-        },
-        "control": {
-          "chrome": "none",
-          "focus": { "kind": "outline", "color": "accent" }
-        },
-        "states": {
-          "hover": { "background": "accentSubtle" },
-          "pressed": { "background": "accentSubtle" },
-          "hoverPressed": { "background": "accentSubtle" },
-          "disabled": { "background": "control" }
-        },
+        "layout": { "width": 40, "height": 20 },
         "children": [
           {
+            "id": "toggle-switch-track",
+            "el": "rect",
+            "attrs": { "width": 40, "height": 20, "rx": 10, "fill": "var(--color-{trackFill})" }
+          },
+          {
+            "id": "toggle-switch-stroke",
+            "el": "rect",
+            "attrs": { "x": 0.5, "y": 0.5, "width": 39, "height": 19, "rx": 9.5, "fill": "none", "stroke": "var(--color-{trackStroke})", "stroke-width": 1 }
+          },
+          {
             "id": "toggle-switch-thumb",
-            "el": "span",
-            "attrs": { "aria-hidden": "true" },
-            "layout": { "width": 14, "height": 14 },
-            "appearance": { "background": "accentInk", "radius": "pill" }
+            "el": "rect",
+            "attrs": { "x": "{knobX}", "y": "{knobY}", "width": "{knobWidth}", "height": "{knobHeight}", "rx": 7, "fill": "var(--color-{knobFill})" }
           }
         ]
       }
@@ -342,6 +371,7 @@
           "aria-label": "Connected"
         },
         "layout": {
+          "mode": "horizontal",
           "width": 10,
           "height": 10
         },
@@ -353,28 +383,31 @@
     },
     {
       "name": "Avatar",
-      "note": "Basic control. WinUI PersonPicture circular avatar. Non-interactive. The agent avatar is 32x32 (AgentIdentityBadge), the workspace Owner avatar is 24x24; both render a circular initials/photo tile. Previewed at 32x32 with a `pill` radius and a `muted` placeholder fill plus `ink`-on-muted initials; real photo/initials and the circular clip are WinUI template behavior and a port note.",
+      "note": "Basic control. Default WinUI PersonPicture initials reference: 96x96, a 1px ellipse stroke, PersonPictureEllipseFillThemeBrush, primary foreground, and SemiBold initials at diameter * 0.42 = 40.32px. ContentControlThemeFontFamily, not the Caption style. No hover or pressed states: PersonPicture is not interactive. AvatarStates shows Contact and People glyph fallbacks. Photo clipping, automatic initials, badges, and native TextLineBounds=Tight remain native behavior. Existing 32px agent and 24px owner avatars are usage overrides, not this control's defaults.",
       "props": {
-        "initials": "AU"
+        "initials": "AU",
+        "name": "Example user"
       },
       "root": {
         "id": "avatar-root",
         "el": "span",
         "attrs": {
-          "role": "img"
+          "role": "img",
+          "aria-label": "{name}"
         },
         "layout": {
           "mode": "horizontal",
           "align": "center",
           "justify": "center",
-          "width": 32,
-          "height": 32
+          "width": 96,
+          "height": 96
         },
         "appearance": {
-          "fontFamily": "body",
-          "textStyle": "small",
-          "color": "ink",
-          "background": "muted",
+          "textStyle": "personInitials",
+          "color": "nativeText",
+          "background": "personPictureFill",
+          "borderColor": "personPictureStroke",
+          "borderWidth": 1,
           "radius": "pill"
         },
         "children": [
@@ -383,11 +416,27 @@
       }
     },
     {
+      "name": "AvatarStates",
+      "note": "PersonPicture's native initials, NoPhotoOrInitials (Contact U+E77B), and Group (People U+E716) presentations. All are static and non-focusable. Photo and badge states require native image/initials handling and are not claimed by these references.",
+      "root": {
+        "id": "avatar-states-root",
+        "el": "div",
+        "layout": { "mode": "horizontal", "gap": "6", "wrap": true },
+        "children": [
+          { "id": "avatar-initials", "component": "Avatar" },
+          { "id": "avatar-contact", "component": "Avatar", "props": { "initials": "\uE77B", "name": "Person without photo or initials" }, "appearance": { "textStyle": "personSymbol" } },
+          { "id": "avatar-group", "component": "Avatar", "props": { "initials": "\uE716", "name": "Group" }, "appearance": { "textStyle": "personSymbol" } }
+        ]
+      }
+    },
+    {
       "name": "InfoBar",
-      "note": "Basic control. The Fluent InfoBar severity banner used for workspace operation errors and app notifications (WorkspaceWindow OperationInfo, HubWindow AppNotificationInfoBar, ChatPage). Previewed at Error severity: a `surface` sheet with a `line` hairline, `md` radius, and 16px padding, led by a `critical` status glyph (Segoe Fluent Error, U+EA39), a `ink` BodyStrong title, a `muted` caption message, and a trailing SubtleButton close (U+E711). Severity recolors the leading glyph only: `critical` Error, `warning` Warning, `positive` Success, `accent` Informational. The banner body is non-interactive; the close button carries the shared subtle hover/pressed states.",
+      "note": "Basic control. Native InfoBar horizontal reference, shown Error. Severity changes BOTH background and layered 16px icon; InfoBarStates shows all four. Native title is 14px SemiBold and message 14px Normal, both primary foreground. ControlCornerRadius=4; content-grid minimum height=48 plus outer border; leading padding=16, icon gap=14, text top=14, title/message gap=12, panel end margin=16. Close uses InfoBarCloseButtonStyle (DefaultButtonStyle with AppBarButton resources), 38x38 plus margin 5, with a 16px Cancel glyph. Hover/press/disabled/focus visuals work, but close does NOT dismiss: the renderer has no dismiss action. Native responsive InfoBarPanel, conditional content and high-contrast 2px border are unsupported; browser wrapping and the 1px preview border are not 1:1 native proof.",
       "props": {
         "title": "Couldn't reach the gateway",
-        "message": "Check that the gateway is running, then retry."
+        "message": "Check that the gateway is running, then retry.",
+        "iconTone": "infoErrorIcon",
+        "iconGlyph": "\uF13D"
       },
       "root": {
         "id": "info-bar-root",
@@ -395,42 +444,50 @@
         "attrs": { "role": "status" },
         "layout": {
           "mode": "horizontal",
-          "gap": "3",
-          "padding": "4",
+          "padding": { "left": "4" },
           "align": "start",
           "width": "fill"
         },
         "appearance": {
-          "background": "surface",
-          "borderColor": "line",
-          "radius": "md"
+          "background": "infoErrorFill",
+          "borderColor": "infoBorder",
+          "borderWidth": 1,
+          "radius": "sm"
         },
         "children": [
           {
             "id": "info-bar-icon",
-            "el": "span",
+            "el": "svg",
             "attrs": {
               "aria-hidden": "true",
-              "style": "font-family:'Segoe Fluent Icons','Segoe MDL2 Assets',sans-serif;font-size:16px"
+              "viewBox": "0 0 16 16",
+              "width": 16,
+              "height": 16
             },
-            "appearance": { "color": "critical" },
-            "children": [ "\uEA39" ]
+            "layout": { "width": 16, "height": 16 },
+            "margin": { "top": "4", "right": "infoIconGap", "bottom": "4" },
+            "appearance": { "textStyle": "infoSymbol" },
+            "children": [
+              { "id": "info-bar-icon-background", "el": "text", "attrs": { "x": 8, "y": 8, "text-anchor": "middle", "dominant-baseline": "central", "fill": "var(--color-{iconTone})" }, "children": [ "\uF136" ] },
+              { "id": "info-bar-icon-foreground", "el": "text", "attrs": { "x": 8, "y": 8, "text-anchor": "middle", "dominant-baseline": "central", "fill": "var(--color-infoIconForeground)" }, "children": [ "{iconGlyph}" ] }
+            ]
           },
           {
             "id": "info-bar-text",
             "el": "div",
-            "layout": { "mode": "vertical", "gap": "1", "grow": true, "width": "fill" },
+            "layout": { "mode": "horizontal", "gap": "3", "wrap": true, "grow": true },
+            "margin": { "top": "infoTextTop", "right": "4" },
             "children": [
               {
                 "id": "info-bar-title",
                 "el": "span",
-                "appearance": { "fontFamily": "body", "textStyle": "body", "color": "ink" },
+                "appearance": { "fontFamily": "body", "textStyle": "bodyStrong", "color": "nativeText" },
                 "children": [ "{title}" ]
               },
               {
                 "id": "info-bar-message",
                 "el": "span",
-                "appearance": { "fontFamily": "body", "textStyle": "caption", "color": "muted" },
+                "appearance": { "fontFamily": "body", "textStyle": "body", "color": "nativeText" },
                 "children": [ "{message}" ]
               }
             ]
@@ -438,30 +495,45 @@
           {
             "id": "info-bar-close",
             "el": "button",
-            "attrs": { "type": "button", "aria-label": "Close" },
-            "layout": { "mode": "horizontal", "align": "center", "justify": "center", "width": 30, "height": 30 },
-            "appearance": { "color": "muted", "background": "$none", "radius": "sm" },
+            "attrs": { "type": "button", "aria-label": "Close (visual reference only)", "title": "Visual states only. Dismissal is not supported by this renderer." },
+            "layout": { "mode": "horizontal", "align": "center", "justify": "center", "width": 38, "height": 38 },
+            "margin": "buttonTop",
+            "appearance": { "color": "nativeText", "background": "$none", "borderColor": "$none", "borderWidth": 1, "radius": "sm" },
             "control": {
               "chrome": "none",
               "focus": { "kind": "outline", "color": "accent" }
             },
             "states": {
-              "hover": { "background": "subtleHover" },
-              "pressed": { "background": "subtlePressed" },
-              "hoverPressed": { "background": "subtlePressed" }
+              "hover": { "background": "infoCloseHoverFill", "color": "infoCloseHoverText" },
+              "pressed": { "background": "infoClosePressedFill", "color": "infoClosePressedText" },
+              "hoverPressed": { "background": "infoClosePressedFill", "color": "infoClosePressedText" },
+              "disabled": { "background": "$none", "color": "subtleButtonDisabledText" }
             },
             "children": [
               {
                 "id": "info-bar-close-glyph",
                 "el": "span",
-                "attrs": {
-                  "aria-hidden": "true",
-                  "style": "font-family:'Segoe Fluent Icons','Segoe MDL2 Assets',sans-serif;font-size:11px"
-                },
+                "attrs": { "aria-hidden": "true" },
+                "appearance": { "textStyle": "infoSymbol" },
                 "children": [ "\uE711" ]
               }
             ]
           }
+        ]
+      }
+    },
+    {
+      "name": "InfoBarStates",
+      "note": "Native severity references. Each reuses InfoBar's geometry, typography, layered glyph, and close-control states. The body remains static; severity is not a hover state. No close/dismiss behavior is implemented by Colophon.",
+      "root": {
+        "id": "info-bar-states-root",
+        "el": "div",
+        "layout": { "mode": "vertical", "gap": "3", "width": "fill" },
+        "children": [
+          { "id": "info-bar-informational", "component": "InfoBar", "props": { "title": "Informational", "message": "Gateway settings are ready to review.", "iconTone": "infoAttentionIcon", "iconGlyph": "\uF13F" }, "appearance": { "background": "infoAttentionFill" } },
+          { "id": "info-bar-success", "component": "InfoBar", "props": { "title": "Success", "message": "The gateway is connected.", "iconTone": "infoSuccessIcon", "iconGlyph": "\uF13E" }, "appearance": { "background": "infoSuccessFill" } },
+          { "id": "info-bar-warning", "component": "InfoBar", "props": { "title": "Warning", "message": "Pairing approval is required.", "iconTone": "infoWarningIcon", "iconGlyph": "\uF13C" }, "appearance": { "background": "infoWarningFill" } },
+          { "id": "info-bar-error", "component": "InfoBar", "props": { "title": "Error", "message": "The gateway could not be reached." } }
         ]
       }
     },
@@ -3016,7 +3088,7 @@
             "layout": { "mode": "vertical", "gap": "4", "padding": "5", "width": "fill" },
             "appearance": { "background": "surface", "borderColor": "line", "radius": "md" },
             "children": [
-              { "id": "setup-wizard-card-title", "el": "h2", "appearance": { "fontFamily": "display", "textStyle": "heading", "color": "ink" }, "children": [ "Choose what this node can do" ] },
+              { "id": "setup-wizard-card-title", "el": "h2", "appearance": { "fontFamily": "display", "textStyle": "subtitle", "color": "ink" }, "children": [ "Choose what this node can do" ] },
               { "id": "setup-wizard-opt-1", "component": "CapabilityOptionRow" },
               {
                 "id": "setup-wizard-opt-2",
