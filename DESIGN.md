@@ -10,11 +10,34 @@ colors:
   line: "#e5e5e5"
   accent: "#0067c0"
   accentInk: "#ffffff"
+  accentText: "#003e92"
+  setupCardFill: "#ffffffb3"
+  setupCardStroke: "#0000000f"
+  setupOptionDisabled: "#f9f9f94d"
+  providerArtworkFill: "#202020"
+  providerArtworkStroke: "#00000019"
+  providerArtworkText: "#ffffff"
   positive: "#0f7b0f"
   warning: "#9d5d00"
   critical: "#c42b1c"
   subtleHover: rgba(0,0,0,0.037)
   subtlePressed: rgba(0,0,0,0.024)
+  buttonFill: "#ffffffb3"
+  buttonHoverFill: "#f9f9f980"
+  buttonPressedFill: "#f9f9f94d"
+  buttonDisabledFill: "#f9f9f94d"
+  buttonText: "#000000e4"
+  buttonHoverText: "#000000e4"
+  buttonPressedText: "#0000009e"
+  buttonDisabledText: "#0000005c"
+  buttonBorder: "#0000000f"
+  buttonHoverBorder: "#0000000f"
+  buttonPressedBorder: "#0000000f"
+  buttonDisabledBorder: "#0000000f"
+  buttonAccentBorder: "#ffffff14"
+  buttonAccentPressedBorder: "#ffffff00"
+  buttonAccentDisabledBorder: "#ffffff00"
+  buttonAccentPressedText: "#ffffffb3"
   subtleButtonFill: "#ffffff00"
   subtleButtonHoverFill: "#00000009"
   subtleButtonPressedFill: "#00000006"
@@ -201,6 +224,16 @@ typography:
     fontSize: 48px
     fontWeight: 400
     lineHeight: 48px
+  providerSymbol:
+    fontFamily: '"Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif'
+    fontSize: 24px
+    fontWeight: 400
+    lineHeight: 24px
+  setupActionIcon:
+    fontFamily: '"Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif'
+    fontSize: 13px
+    fontWeight: 400
+    lineHeight: 13px
 spacing:
   "0": 0px
   half: 2px
@@ -241,7 +274,6 @@ x-colophon:
         content: Production reference from OpenClaw.SetupEngine.UI. Basic controls remain in Components; these previews compose those shared definitions.
         components:
           - SetupProgressIndicator
-          - RecommendedBadge
           - ProviderArtwork
           - SetupOptionCard
           - CapabilityOptionRow
@@ -249,8 +281,8 @@ x-colophon:
           - SetupWizardShell
       - id: chat
         name: Chat
-        description: Chat controls, identity badges, and the main workspace.
-        content: Production reference for Reactor chat and the native Home and Sessions workspace. Includes the workspace connection and notification flyouts. Shared building blocks remain in Components.
+        description: Chat messages, composer controls, and conversation composition.
+        content: Production reference for Reactor chat. Workspace identity controls and flyouts live in Settings; shared building blocks remain in Components.
         components:
           - ComposerPicker
           - ComposerPickerOptions
@@ -259,22 +291,39 @@ x-colophon:
           - ChatComposer
           - ChatThread
           - ChatCopyButton
-          - AgentIdentityBadge
-          - UserIdentityBadge
-          - ConnectionStatusFlyout
-          - NotificationFlyout
-          - WorkspaceShell
-          - ExampleScreen
       - id: settings
         name: Settings
-        description: Settings controls, rows, expanders, and window composition.
-        content: Production reference from OpenClaw.Tray.WinUI settings pages and HubWindow. The trailing control owns interaction on static settings cards. Shared building blocks remain in Components.
+        description: Settings patterns, workspace chrome, identity controls, and flyouts.
+        content: Production reference from OpenClaw.Tray.WinUI settings pages, HubWindow, and the Home and Sessions workspace. The trailing control owns interaction on static settings cards. Shared building blocks remain in Components.
         components:
           - SettingsSectionHeader
           - SettingsCard
           - SettingsToggleRow
           - SettingsExpanderRow
           - SettingsWindowShell
+          - NotificationFlyout
+          - ConnectionStatusFlyout
+          - WorkspaceShell
+          - AgentIdentityBadge
+          - UserIdentityBadge
+      - id: components
+        name: Components
+        components:
+          - Button
+          - ButtonStandard
+          - TextBox
+          - Field
+          - Card
+          - Badge
+          - BadgeAccent
+          - SubtleButton
+          - HyperlinkButton
+          - ToggleSwitch
+          - StatusDot
+          - Avatar
+          - AvatarStates
+          - InfoBar
+          - InfoBarStates
     meta:
       version: 1
       updatedBy: xaml+manual
@@ -374,6 +423,34 @@ x-colophon:
           dark: "#000000"
           highContrast: "#000000"
         usage: Text/glyphs on accent fills.
+      accentText:
+        resource: AccentTextFillColorPrimaryBrush
+        themes: { dark: "#99ebff", highContrast: "#ffffff" }
+        usage: Outlined accent badge text and border. Native SystemAccentColorDark2 in light, Light3 in dark, and SystemColorWindowTextColor in high contrast; not AccentFillColorDefaultBrush.
+      setupCardFill:
+        resource: CardBackgroundFillColorDefaultBrush
+        themes: { dark: "#ffffff0d", highContrast: "#000000" }
+        usage: Alpha-preserving backplate for setup choice groups. Paint once behind transparent rows, not on every nested row.
+      setupCardStroke:
+        resource: CardStrokeColorDefaultBrush
+        themes: { dark: "#00000019", highContrast: "#ffffff" }
+        usage: Native 1px setup group border and resting CompactChoice bottom divider. Unlike the generic line swatch, preserves native alpha.
+      setupOptionDisabled:
+        resource: SettingsCardBackgroundDisabled
+        themes: { dark: "#ffffff0b", highContrast: "#000000" }
+        usage: Disabled provider row uses ControlFillColorDisabledBrush; high contrast uses SystemControlBackgroundBaseLowBrush.
+      providerArtworkFill:
+        resource: SolidBackgroundFillColorBaseBrush
+        themes: { dark: "#202020", highContrast: "#000000" }
+        usage: ProviderArtwork explicitly requests Dark, even in a light setup page. High contrast still follows SystemColorWindowColor.
+      providerArtworkStroke:
+        resource: CardStrokeColorDefaultBrush
+        themes: { dark: "#00000019", highContrast: "#ffffff" }
+        usage: ProviderArtwork requested-Dark tile border; high contrast follows SystemColorWindowTextColor.
+      providerArtworkText:
+        resource: TextFillColorPrimaryBrush
+        themes: { dark: "#ffffff", highContrast: "#ffffff" }
+        usage: Representative provider fallback glyph in the tile's requested Dark theme.
       positive:
         resource: SystemFillColorSuccessBrush
         themes:
@@ -404,6 +481,70 @@ x-colophon:
           dark: rgba(255,255,255,0.0419)
           highContrast: transparent
         usage: "Pressed fill for subtle/transparent controls. Fluent SubtleFillColorTertiary (light #06000000)."
+      buttonFill:
+        resource: ButtonBackground
+        themes: { dark: "#ffffff0f", highContrast: "#000000" }
+        usage: Normal Button fill with native ControlFillColorDefault alpha, not the opaque stock-input preview.
+      buttonHoverFill:
+        resource: ButtonBackgroundPointerOver
+        themes: { dark: "#ffffff15", highContrast: "#000000" }
+        usage: ControlFillColorSecondaryBrush; high contrast uses SystemColorHighlightTextColorBrush.
+      buttonPressedFill:
+        resource: ButtonBackgroundPressed
+        themes: { dark: "#ffffff08", highContrast: "#000000" }
+        usage: ControlFillColorTertiaryBrush; high contrast uses SystemColorHighlightTextColorBrush.
+      buttonDisabledFill:
+        resource: ButtonBackgroundDisabled
+        themes: { dark: "#ffffff0b", highContrast: "#000000" }
+        usage: ControlFillColorDisabledBrush; high contrast uses SystemControlBackgroundBaseLowBrush.
+      buttonText:
+        resource: ButtonForeground
+        themes: { dark: "#ffffff", highContrast: "#ffffff" }
+        usage: TextFillColorPrimaryBrush; high contrast uses SystemColorButtonTextColor.
+      buttonHoverText:
+        resource: ButtonForegroundPointerOver
+        themes: { dark: "#ffffff", highContrast: "#ffff00" }
+        usage: TextFillColorPrimaryBrush; high contrast SystemControlHighlightBaseHighBrush resolves to SystemColorHighlightColor.
+      buttonPressedText:
+        resource: ButtonForegroundPressed
+        themes: { dark: "#ffffffc5", highContrast: "#ffff00" }
+        usage: TextFillColorSecondaryBrush; high contrast uses SystemColorHighlightColor.
+      buttonDisabledText:
+        resource: ButtonForegroundDisabled
+        themes: { dark: "#ffffff5d", highContrast: "#808080" }
+        usage: TextFillColorDisabledBrush; high contrast uses SystemColorGrayTextColor.
+      buttonBorder:
+        resource: ButtonBorderBrush
+        themes: { dark: "#ffffff12", highContrast: "#ffffff" }
+        usage: Preview-only default stroke swatch for native ControlElevationBorderBrush, not a reproduction of its 3px absolute gradient. High contrast SystemControlForegroundTransparentBrush is solid SystemColorButtonTextColor, despite its name.
+      buttonHoverBorder:
+        resource: ButtonBorderBrushPointerOver
+        themes: { dark: "#ffffff12", highContrast: "#ffff00" }
+        usage: Same native elevation gradient as rest; high contrast changes to SystemColorHighlightColor.
+      buttonPressedBorder:
+        resource: ButtonBorderBrushPressed
+        themes: { dark: "#ffffff12", highContrast: "#000000" }
+        usage: Native flat ControlStrokeColorDefaultBrush; high contrast uses SystemColorHighlightTextColor.
+      buttonDisabledBorder:
+        resource: ButtonBorderBrushDisabled
+        themes: { dark: "#ffffff12", highContrast: "#808080" }
+        usage: ControlStrokeColorDefaultBrush; high contrast SystemControlDisabledTransparentBrush is solid SystemColorGrayTextColor.
+      buttonAccentBorder:
+        resource: AccentButtonBorderBrush
+        themes: { dark: "#ffffff14", highContrast: "#ffff00" }
+        usage: Preview-only default on-accent stroke swatch for native AccentControlElevationBorderBrush. Pointer-over uses the same gradient; both high-contrast aliases resolve to SystemColorHighlightColor.
+      buttonAccentPressedBorder:
+        resource: AccentButtonBorderBrushPressed
+        themes: { dark: "#ffffff00", highContrast: "#ffff00" }
+        usage: Transparent in light/dark; high contrast SystemControlHighlightTransparentBrush resolves to SystemColorHighlightColor.
+      buttonAccentDisabledBorder:
+        resource: AccentButtonBorderBrushDisabled
+        themes: { dark: "#ffffff00", highContrast: "#808080" }
+        usage: Transparent in light/dark; high contrast uses SystemColorGrayTextColor.
+      buttonAccentPressedText:
+        resource: AccentButtonForegroundPressed
+        themes: { dark: "#00000080", highContrast: "#ffff00" }
+        usage: TextOnAccentFillColorSecondaryBrush; high contrast SystemControlHighlightBaseHighBrush resolves to SystemColorHighlightColor.
       subtleButtonFill:
         resource: SubtleButtonBackground
         themes:
@@ -753,6 +894,8 @@ Personality: native, trustworthy, calm, precise.
 - **line** {colors.line}: Borders, dividers. Fluent CardStrokeColorDefault / DividerStroke.
 - **accent** {colors.accent}: Primary actions, links, selection, focus. Follows SystemAccentColor (default AccentDark1 on light).
 - **accentInk** {colors.accentInk}: Text/glyphs on accent fills.
+- **accentText** {colors.accentText}: `AccentTextFillColorPrimaryBrush` for outlined accent badge text and border. It uses Dark2 in light and Light3 in dark, not the primary button fill palette.
+- **Setup choice groups:** {colors.setupCardFill} and {colors.setupCardStroke} preserve `CardBackgroundFillColorDefaultBrush` and `CardStrokeColorDefaultBrush`, including their alpha. The group owns the backplate and 1px border; row hover/pressed fills are separate layers.
 - **positive** {colors.positive}: Success / connected states. Fluent SystemFillColorSuccess.
 - **warning** {colors.warning}: Warnings / attention. Fluent SystemFillColorCaution.
 - **critical** {colors.critical}: Errors, disconnected, destructive. Fluent SystemFillColorCritical.
@@ -853,20 +996,42 @@ This is a production-structure and geometry reference, not a pixel-identity clai
 Reuse [component patterns](.agents/design/components.jsonc); these describe design intent, not shipping code.
 Optional click-through flows live in `.agents/design/prototypes.jsonc`.
 
-The catalog is organized into four families. Colophon's left navigation includes dedicated Setup, Chat, and Settings pages, defined by `x-colophon.tokens.pages` above. Each page selects existing component definitions without copying them, so shared component references continue to resolve. Basic controls live under Components. The installed Colophon version also shows the full catalog on that built-in page; it does not support filtering Components down to basic controls.
+The catalog is organized into four families through `x-colophon.tokens.pages` above. The entry with `id: components` selects the built-in Components page; Setup, Chat, and Settings select their feature-specific previews. Each of the 38 definitions has exactly one standalone page assignment: Components 15, Setup 6, Chat 7, and Settings 10. Page selections do not copy or remove definitions, so shared controls still resolve inside compositions and flyouts. Keep control examples and variants beside their basic control, not on another feature page. The old synthetic Connection example screen and separate RecommendedBadge definition have been removed.
 
 Every interactive control documents its hover and pressed states; static controls say so. States bind Fluent resources (`SubtleFillColorSecondary` for hover, `SubtleFillColorTertiary` for pressed, accent variants for primary actions), never raw hex.
 
 ComposerPickerOptions rows use full-row `subtleHover` and `subtlePressed` fills with `sm` corners, both in the catalog and in opened composer flyouts. Pointer exit restores transparency; hover never changes the checked row, accent checkmark or layout. These tokens stay transparent in high contrast, so the preview does not reproduce native MenuFlyout system-highlight overrides.
 
-- **Basic controls.** Button (primary/standard/subtle), SubtleButton (native default style), HyperlinkButton, TextBox, Field, Badge, ToggleSwitch, StatusDot, Avatar, InfoBar, and Card. TextBox is the reusable default WinUI single-line input. Field composes a label and TextBox; its Gateway address example passes the label and placeholder into that shared control.
-- **Setup.** SetupProgressIndicator, RecommendedBadge, ProviderArtwork, SetupOptionCard, CapabilityOptionRow, SetupPhaseStatus, and the SetupWizardShell frame, ported from `OpenClaw.SetupEngine.UI`.
-- **Chat.** ChatBubble (assistant prose), ChatUserBubble (sent user message), ChatComposer, ChatThread, ComposerPicker, ComposerPickerOptions, and ChatCopyButton, plus the native workspace identity controls (AgentIdentityBadge, UserIdentityBadge), ConnectionStatusFlyout, NotificationFlyout, WorkspaceShell, and ExampleScreen. See the Chat surface and Workspace shell sections.
-- **Settings.** SettingsSectionHeader, SettingsCard, SettingsToggleRow, SettingsExpanderRow, and the SettingsWindowShell host frame, ported from `OpenClaw.Tray.WinUI` pages and `HubWindow`.
+- **Basic controls and their examples (15).** Button (accent), ButtonStandard (normal), SubtleButton (native default style), HyperlinkButton, TextBox, Field, Badge, BadgeAccent, ToggleSwitch, StatusDot, Avatar, AvatarStates, InfoBar, InfoBarStates, and Card. ButtonStandard references Button and overrides its state brushes, just as BadgeAccent references Badge; neither duplicates shared markup. TextBox is the reusable default WinUI single-line input. Field composes a label and TextBox; its Gateway address example passes the label and placeholder into that shared control. AvatarStates and InfoBarStates demonstrate their parent control's presentations, not separate app features.
+- **Setup (6).** SetupProgressIndicator, ProviderArtwork, SetupOptionCard, CapabilityOptionRow, SetupPhaseStatus, and the SetupWizardShell frame, ported from `OpenClaw.SetupEngine.UI`. Recommended labels reuse BadgeAccent from Components.
+- **Chat (7).** ChatBubble (assistant prose), ChatUserBubble (sent user message), ChatComposer, ChatThread, ComposerPicker, ComposerPickerOptions, and ChatCopyButton. See the Chat surface section.
+- **Settings and workspace (10).** SettingsSectionHeader, SettingsCard, SettingsToggleRow, SettingsExpanderRow, and SettingsWindowShell, plus the native workspace identity controls (AgentIdentityBadge, UserIdentityBadge), ConnectionStatusFlyout, NotificationFlyout, and WorkspaceShell. These come from `OpenClaw.Tray.WinUI` pages, `HubWindow`, and `WorkspaceWindow`. See the Workspace shell section.
 
 TextBox ships as the stock `Microsoft.UI.Xaml.Controls.TextBox`, as used by `DirectUrlBox` in `Pages/ConnectionPage.xaml`, not a custom control template. The Colophon preview uses 14px body text, 32px single-line height, `sm` corners, exact text-control padding, pointer-over and disabled resource tokens, and the accent focus underline. WinUI has no separate pressed background for the input itself; pressing enters its focused state. The browser preview approximates the native elevation border with `controlLine` and does not reproduce the native focused-fill transition or clear-button template.
 
 Card binds its title to `subtitle` (`SubtitleTextBlockStyle`, 20/28 SemiBold) and its description to `body` (`BodyTextBlockStyle`, 14/20 Regular). Its Open report action references the shared HyperlinkButton, not a separately styled link. The card remains static while the action inherits the shared control's typography, hover, pressed, disabled, and focus states.
+
+### Native normal and accent buttons
+
+Button is the accent example; ButtonStandard is its reusable normal variation. Both appear on Components. SetupWizardShell uses ButtonStandard for Back and Button for Continue; SettingsCard also uses ButtonStandard for Change. The old `variant` prop was ineffective because a CSS class could not override explicit accent appearance and states. Named component references now select the actual brushes, without duplicating button markup.
+
+The [native Button styles](https://github.com/microsoft/microsoft-ui-xaml/blob/09cfc8ff3fbf556166dd813ae9b81646716f54bf/controls/dev/CommonStyles/Button_themeresources.xaml) own exact 11,5,11,6 padding, a 1px border, 4px corners, normal-weight 14px content and an 83ms linear background transition. Foreground and border changes are discrete, not part of a generic all-color transition. The normal variation binds `Button*` resource aliases for every state; accent reuses the existing `accent`, `accentInk` and `chatAction*` aliases where their native resource values match. Its pressed foreground and borders have dedicated `buttonAccent*` tokens.
+
+High-contrast aliases are resolved through the Windows SDK's system resource dictionary, not inferred from their names: `SystemControlForegroundTransparentBrush` becomes button text, `SystemControlHighlightBaseHighBrush` and `SystemControlHighlightTransparentBrush` become highlight, and `SystemControlDisabledTransparentBrush` becomes gray text. The preview uses its representative black/white/yellow system palette; it is not a Windows high-contrast screenshot.
+
+`Pages/CapabilitiesPage.xaml` at production commit `0131e4ce1f7937b22c69b289564087061687fa14` uses an unstyled normal Back button and an `AccentButtonStyle` Next button, each with `MinWidth=100`. The catalog preserves its existing Continue sample label and shows both footer instances at 100px. That fixed preview width represents these short labels only: shipping code must retain the native minimum and grow for localization. The shared button itself is content-sized, with no universal 100px minimum.
+
+These are direct native style/resource mappings, **not a verified pixel-identical browser port**. Colophon cannot express `ControlElevationBorderBrush` / `AccentControlElevationBorderBrush` gradients or the normal button's `BackgroundSizing=InnerBorderEdge`; their preview borders use flat default stroke swatches. Body uses a 20px browser line box, and native font measurement/rasterization and the system focus visual (`FocusVisualMargin=-3`) remain WinUI-owned. Ship the stock Button styles and templates, not the browser approximation.
+
+### Setup badge and choice cards
+
+These references follow production commit `0131e4ce1f7937b22c69b289564087061687fa14`: `Controls/RecommendedBadge.xaml`, `Controls/ProviderArtwork.xaml`, `Pages/AiSetupPage.xaml`, and `Pages/CapabilitiesPage.xaml`. The shipped SettingsControls package is `8.3.260402-preview2`, whose [SettingsCard template](https://github.com/CommunityToolkit/Windows/blob/39c45efed2601b22170b9f6258c9cbe7e51031d1/components/SettingsControls/src/SettingsCard/SettingsCard.xaml) owns inherited padding, action-icon metrics, and interaction resources.
+
+- **Accent badge:** BadgeAccent composes Badge with Caption typography, a transparent fill, 1px `accentText` border, `sm` corners, and exact 8,4 padding. Both text and border use `AccentTextFillColorPrimaryBrush`; disabled uses `TextFillColorDisabledBrush`. It is read-only and has no hover/pressed action. Recommended is example text, not a separate control or Setup-page preview. Existing status-pill Badge instances keep their existing geometry and tones.
+- **Provider option:** the 8px-rounded group owns a 1px `setupCardStroke` border and `setupCardFill` backplate. The inner row is transparent at rest, with a bottom-only 1px divider and native MinHeight 64. Its preview uses `sm` corners to match CapabilityOptionRow, rather than the native `CompactChoice` square corners. Toolkit padding is 16 on all sides, not 16,12. Its 32px Viewbox contains the 42px ProviderArtwork tile (24px content + 8px padding + 1px border on each side); the title/detail stack sits 12px after the tile. Body Strong and Caption are separated by 4px. Trailing body action text precedes a 13px chevron with 14px leading margin. The artwork explicitly requests Dark, even on light pages; the representative glyph is not provider branding.
+- **Capability option:** the same group backplate surrounds a transparent ListViewItem with 16,12 padding. Body Strong title and BadgeAccent share the first line with an 8px gap; Caption detail follows 4px below. A full-width right-aligned badge is not the production layout. Nested rows in SetupWizardShell clear their standalone group paint so the parent paints the backplate once. The grouped wizard example adds one straight, full-width 1px `setupCardStroke` separator between options, with no gap or rounded divider ends.
+
+The catalog deliberately gives SetupOptionCard the same hover/pressed treatment as CapabilityOptionRow: `subtleHover` / `subtlePressed`, `sm` corners, and the shared renderer transition. The outer border and bottom divider stay `setupCardStroke`, with no extra hover underline. Pointer exit restores transparency without changing layout or tinting text/artwork. This user-directed preview choice differs from the stock SettingsCard state brushes, gradient border and 83ms transition; it does not change shipping code. Native minimum sizes, the action label's 112px maximum width, SettingsCard adaptive reflow, ListView selection/focus visuals, and provider image loading remain native behavior. Both preview controls use transparent interaction fills in high contrast, rather than simulating native system-highlight states.
 
 StatusDot is a non-interactive 10x10 indicator with `pill` corners and a semantic fill. Its standalone preview uses explicit Auto Layout so the empty span retains its width and height instead of collapsing as inline text.
 

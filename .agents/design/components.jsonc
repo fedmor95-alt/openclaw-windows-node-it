@@ -7,47 +7,80 @@
   "components": [
     {
       "name": "Button",
-      "note": "Basic control. Primary action — one per view, where the eye should land. Previewed as `variant:primary`, the WinUI AccentButtonStyle: `accent` fill (AccentFillColorDefaultBrush) with `accentInk` text (TextOnAccentFillColorPrimaryBrush), `sm` radius (ControlCornerRadius). Hover = AccentFillColorSecondary (token `accentSubtle`); pressed = AccentFillColorTertiary (no exact token, previewed with `accentSubtle`, documented here); disabled = AccentFillColorDisabled with TextOnAccentFillColorDisabled (previewed as `control`/`muted`). The `variant:standard` Button swaps to the default ButtonStyle: `control` fill (ControlFillColorDefault), `controlLine` border (ControlStrokeColorDefault), `ink` text; hover ControlFillColorSecondary, pressed ControlFillColorTertiary, disabled ControlFillColorDisabled. Subtle/icon buttons are the separate SubtleButton block. Padding mirrors WinUI ButtonPadding (11,5,11,6), snapped to spacing tokens 3 (12≈11) and 1 (4≈5/6). In-app MinWidth 100px keeps short labels (OK / Connect) from cramping and gives side-by-side buttons a consistent footprint; that minimum has no spacing-token equivalent, so it stays a port note and the preview hugs its label.",
+      "note": "Basic control. Accent variation: ship the stock WinUI Button with AccentButtonStyle. ButtonStandard references this shared markup and overrides its state brushes for the normal style; a variant class cannot override inline token styling. Both use exact ButtonPadding 11,5,11,6, a retained 1px ButtonBorderThemeThickness, ControlCornerRadius 4, normal-weight 14px content, and the native 83ms linear background-only transition. Accent fill/foreground use accent/accentInk at rest; existing chatAction tokens already bind the same AccentButton hover, pressed-fill, and disabled resources. Pressed text and state borders have dedicated aliases, including high-contrast system colors. Width and height follow content; MinWidth 100 belongs only to wizard instances. Browser limits: elevation borders are flat swatches, the body line box is 20px, and the focus outline is not WinUI's system focus visual. Keep the native template, gradient brush, text measurement and FocusVisualMargin=-3 when shipping.",
       "props": {
         "children": "Save changes",
-        "variant": "primary"
+        "disabled": "false"
       },
       "root": {
         "id": "button-root",
         "el": "button",
-        "class": "ds-btn ds-btn-{variant}",
         "attrs": {
-          "type": "button"
+          "type": "button",
+          "aria-disabled": "{disabled}"
         },
         "layout": {
           "mode": "horizontal",
           "padding": {
-            "x": "3",
-            "y": "1"
+            "left": "buttonHorizontal",
+            "top": "buttonTop",
+            "right": "buttonHorizontal",
+            "bottom": "buttonBottom"
           },
           "align": "center",
           "justify": "center",
-          "width": "hug"
+          "width": "hug",
+          "height": "hug"
         },
         "appearance": {
           "fontFamily": "body",
           "textStyle": "body",
           "color": "accentInk",
           "background": "accent",
+          "borderColor": "buttonAccentBorder",
+          "borderWidth": 1,
           "radius": "sm"
         },
         "control": {
+          "chrome": "none",
           "focus": { "kind": "outline", "color": "accent" }
         },
         "states": {
-          "hover": { "background": "accentSubtle" },
-          "pressed": { "background": "accentSubtle" },
-          "hoverPressed": { "background": "accentSubtle" },
-          "disabled": { "color": "muted", "background": "control" }
+          "hover": { "color": "accentInk", "background": "chatActionHover", "borderColor": "buttonAccentBorder" },
+          "pressed": { "color": "buttonAccentPressedText", "background": "chatActionPressed", "borderColor": "buttonAccentPressedBorder" },
+          "hoverPressed": { "color": "buttonAccentPressedText", "background": "chatActionPressed", "borderColor": "buttonAccentPressedBorder" },
+          "disabled": { "color": "chatActionDisabledText", "background": "chatActionDisabled", "borderColor": "buttonAccentDisabledBorder" }
         },
+        "transitions": [
+          { "properties": ["background-color"], "duration": 83, "easing": "linear" }
+        ],
         "children": [
           "{children}"
         ]
+      }
+    },
+    {
+      "name": "ButtonStandard",
+      "note": "Normal variation of the shared Button, not a second implementation. Ship a stock WinUI Button with DefaultButtonStyle (no AccentButtonStyle), as used by Back in SetupEngine.UI/Pages/CapabilitiesPage.xaml. Inherits exact padding, 1px border, 4px corners, regular 14px content, disabled semantics, keyboard focus and 83ms background transition. Dedicated Button* resource tokens preserve normal, pointer-over, pressed and disabled fill/foreground/border, including high contrast. The native rest/hover ControlElevationBorderBrush remains a gradient; this renderer can only show its default flat stroke swatch and cannot reproduce BackgroundSizing=InnerBorderEdge. Native font metrics and system focus remain platform-owned. Use this same variation for ordinary secondary actions such as SettingsCard's Change.",
+      "props": {
+        "children": "Standard button",
+        "disabled": "false"
+      },
+      "root": {
+        "id": "button-standard-root",
+        "component": "Button",
+        "props": { "children": "{children}", "disabled": "{disabled}" },
+        "appearance": {
+          "color": "buttonText",
+          "background": "buttonFill",
+          "borderColor": "buttonBorder"
+        },
+        "states": {
+          "hover": { "color": "buttonHoverText", "background": "buttonHoverFill", "borderColor": "buttonHoverBorder" },
+          "pressed": { "color": "buttonPressedText", "background": "buttonPressedFill", "borderColor": "buttonPressedBorder" },
+          "hoverPressed": { "color": "buttonPressedText", "background": "buttonPressedFill", "borderColor": "buttonPressedBorder" },
+          "disabled": { "color": "buttonDisabledText", "background": "buttonDisabledFill", "borderColor": "buttonDisabledBorder" }
+        }
       }
     },
     {
@@ -199,7 +232,7 @@
     },
     {
       "name": "Badge",
-      "note": "Basic control. Status pill — a read-only, non-interactive label, so it carries no hover/pressed states. Uses semantic color tokens, never a raw hex: `positive` (SystemFillColorSuccess), `warning` (SystemFillColorCaution), `critical` (SystemFillColorCritical), or `muted` for neutral. Padding tokens 3/1 give the pill a compact footprint; the `pill` radius and tone color come from the ds-badge class. Two production relatives: the WorkspaceShell count badge is a Fluent InfoBadge (default pill geometry, framework fill), and the notification recurrence badge is a 10px-radius `warning` subtle-background chip with 7,1 padding — both non-interactive, documented on their host components.",
+      "note": "Basic control. Read-only status pill with no hover/pressed actions. Semantic tones positive, warning and critical use the existing ds-badge classes; padding remains 12,4 and the radius is pill. BadgeAccent is the shared outlined accent variation: it references this Badge, overriding appearance and padding rather than duplicating its markup. Recommended is example text for that variant, not a separate setup control. Workspace count and notification recurrence badges retain their documented host-specific geometry.",
       "props": {
         "children": "Connected",
         "tone": "positive"
@@ -220,6 +253,29 @@
         "children": [
           "{children}"
         ]
+      }
+    },
+    {
+      "name": "BadgeAccent",
+      "note": "Outlined accent variation of Badge, derived from production Controls/RecommendedBadge.xaml at 0131e4ce1f7937b22c69b289564087061687fa14. Caption text and a 1px border bind AccentTextFillColorPrimaryBrush (accentText), not AccentFillColorDefaultBrush. Transparent fill, sm (4px) corners, and native 8,4 padding. Disabled text and border bind TextFillColorDisabledBrush. Read-only, with no hover/pressed action. This component reference is a named variant of the shared Badge, not a second implementation.",
+      "props": { "children": "Recommended" },
+      "root": {
+        "id": "badge-accent-root",
+        "component": "Badge",
+        "props": { "children": "{children}", "tone": "neutral" },
+        "layout": { "padding": { "x": "2", "y": "1" } },
+        "appearance": {
+          "fontFamily": "body",
+          "textStyle": "caption",
+          "color": "accentText",
+          "background": "$none",
+          "borderColor": "accentText",
+          "borderWidth": 1,
+          "radius": "sm"
+        },
+        "states": {
+          "disabled": { "color": "disabledText", "borderColor": "disabledText" }
+        }
       }
     },
     {
@@ -3007,59 +3063,32 @@
       }
     },
     {
-      "name": "RecommendedBadge",
-      "note": "Setup control. The small outlined \"Recommended\" tag beside a capability profile (Controls/RecommendedBadge.xaml). Non-interactive. An outline-only badge: 1px `accent` border (AccentTextFillColorPrimaryBrush), `accent` caption text, no fill, `sm` radius (4px), padding token `2` horizontal and `1` vertical (8,4). Disabled recolors border and text to `muted` (TextFillColorDisabled). This is a small `sm` badge, not the 999px `pill` Badge.",
-      "props": {
-        "children": "Recommended"
-      },
-      "root": {
-        "id": "recommended-badge-root",
-        "el": "span",
-        "layout": {
-          "mode": "horizontal",
-          "align": "center",
-          "padding": { "x": "2", "y": "1" },
-          "width": "hug"
-        },
-        "appearance": {
-          "fontFamily": "body",
-          "textStyle": "caption",
-          "color": "accent",
-          "background": "$none",
-          "borderColor": "accent",
-          "radius": "sm"
-        },
-        "children": [ "{children}" ]
-      }
-    },
-    {
       "name": "ProviderArtwork",
-      "note": "Setup control. The square icon tile for an AI provider (Controls/ProviderArtwork.xaml). Non-interactive. A 40x40 tile: `surface` (SolidBackgroundFillColorBase) fill, 1px `line` (CardStrokeColorDefault) border, `sm` radius (ControlCornerRadius), token `2` (8px) padding around a 24x24 glyph or image. Previewed with a representative Segoe Fluent glyph.",
+      "note": "Non-interactive provider tile from Controls/ProviderArtwork.xaml. Native size is 42x42: a 24x24 content grid, 8px padding and a 1px border on each side. The Border explicitly requests Dark, binding SolidBackgroundFillColorBaseBrush and CardStrokeColorDefaultBrush even on light pages. The scalable SVG preserves those bounds and 4px outer corners when SetupOptionCard displays it through the native 32x32 Viewbox. The 24px Fluent fallback glyph is representative, not provider branding; image loading stays native.",
       "root": {
         "id": "provider-artwork-root",
-        "el": "span",
+        "el": "svg",
+        "attrs": { "viewBox": "0 0 42 42", "aria-hidden": "true", "focusable": "false" },
         "layout": {
-          "mode": "horizontal",
-          "align": "center",
-          "justify": "center",
-          "padding": "2",
-          "width": 40,
-          "height": 40
-        },
-        "appearance": {
-          "background": "surface",
-          "borderColor": "line",
-          "radius": "sm"
+          "width": 42,
+          "height": 42
         },
         "children": [
           {
-            "id": "provider-artwork-glyph",
-            "el": "span",
+            "id": "provider-artwork-backplate",
+            "el": "rect",
             "attrs": {
-              "aria-hidden": "true",
-              "style": "font-family:'Segoe Fluent Icons','Segoe MDL2 Assets',sans-serif;font-size:24px"
-            },
-            "appearance": { "color": "ink" },
+              "x": 0.5, "y": 0.5, "width": 41, "height": 41, "rx": 3.5,
+              "fill": "var(--color-providerArtworkFill)",
+              "stroke": "var(--color-providerArtworkStroke)",
+              "stroke-width": 1
+            }
+          },
+          {
+            "id": "provider-artwork-glyph",
+            "el": "text",
+            "attrs": { "x": 21, "y": 21, "text-anchor": "middle", "dominant-baseline": "central", "fill": "currentColor" },
+            "appearance": { "textStyle": "providerSymbol", "color": "providerArtworkText" },
             "children": [ "\uE99A" ]
           }
         ]
@@ -3067,102 +3096,148 @@
     },
     {
       "name": "SetupOptionCard",
-      "note": "Setup composite. A clickable provider/mode choice row (AiSetupPage.xaml compact SettingsCard, IsClickEnabled). Built from the ProviderArtwork tile, a title + detail stack, and a trailing action/chevron. The row itself is transparent with a 1px `line` bottom divider (previewed here via a bottom-biased `line` border; the real card draws only the bottom edge), MinHeight 64px, and `md` radius on the enclosing group. Because it is clickable it carries the SettingsCard subtle states: hover = SubtleFillColorSecondary (`subtleHover`), pressed = SubtleFillColorTertiary (`subtlePressed`); disabled drops text to `muted`. Title is `body` BodyStrong, detail is `caption` in `muted`; the 32px artwork column and 12px gap map to tokens `6`/`3`. There is no XAML-defined selected indicator; selection is tracked by the parent ListView and is a port note.",
+      "note": "One-row provider group derived from AiSetupPage.xaml at 0131e4ce1f7937b22c69b289564087061687fa14. The outer Border owns CardBackgroundFillColorDefaultBrush, a 1px CardStrokeColorDefaultBrush stroke and 8px corners. Inherited SettingsCardPadding is 16 on all sides. A 32px ProviderArtwork Viewbox precedes the Body Strong/Caption stack by 12px; stack spacing is 4px. Body action text precedes a 13px chevron with 14px margin. By design, the catalog interaction matches CapabilityOptionRow: subtleHover/subtlePressed fill, sm corners and the shared renderer transition. The outer border and bottom divider remain setupCardStroke in every state. Pointer exit restores transparency without layout changes or tinting child text/artwork. This intentionally differs from the stock CompactChoice square corners, SettingsCard state brushes and 83ms transition; native min/max sizes and adaptive reflow remain port notes. This row is an action, not a selected ListViewItem.",
       "props": {
         "title": "Sign in with GitHub",
-        "detail": "Use your Copilot subscription. No API key needed."
+        "detail": "Use your Copilot subscription. No API key needed.",
+        "action": "Sign in"
       },
       "root": {
         "id": "setup-option-root",
-        "el": "button",
-        "attrs": { "type": "button" },
-        "layout": {
-          "mode": "horizontal",
-          "gap": "3",
-          "padding": { "x": "4", "y": "3" },
-          "align": "center",
-          "width": "fill"
-        },
+        "el": "div",
+        "layout": { "mode": "vertical", "width": "fill" },
         "appearance": {
-          "background": "$none",
-          "borderColor": "line"
-        },
-        "control": {
-          "chrome": "none",
-          "focus": { "kind": "outline", "color": "accent" }
-        },
-        "states": {
-          "hover": { "background": "subtleHover" },
-          "pressed": { "background": "subtlePressed" },
-          "hoverPressed": { "background": "subtlePressed" },
-          "disabled": { "color": "muted", "background": "$none" }
+          "background": "setupCardFill",
+          "borderColor": "setupCardStroke",
+          "borderWidth": 1,
+          "radius": "md"
         },
         "children": [
-          { "id": "setup-option-art", "component": "ProviderArtwork" },
           {
-            "id": "setup-option-text",
-            "el": "div",
-            "layout": { "mode": "vertical", "gap": "1", "grow": true, "width": "fill" },
+            "id": "setup-option-action",
+            "el": "button",
+            "attrs": { "type": "button", "aria-label": "{title}" },
+            "layout": {
+              "mode": "horizontal",
+              "padding": "4",
+              "align": "center",
+              "width": "fill"
+            },
+            "appearance": {
+              "background": "$none",
+              "borderWidth": 0,
+              "radius": "sm",
+              "textAlign": "left"
+            },
+            "control": {
+              "chrome": "none",
+              "focus": { "kind": "outline", "color": "accent" }
+            },
+            "states": {
+              "hover": { "background": "subtleHover" },
+              "pressed": { "background": "subtlePressed" },
+              "hoverPressed": { "background": "subtlePressed" },
+              "disabled": { "color": "disabledText", "background": "setupOptionDisabled" }
+            },
             "children": [
-              { "id": "setup-option-title", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "body", "color": "ink" }, "children": [ "{title}" ] },
-              { "id": "setup-option-detail", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "caption", "color": "muted" }, "children": [ "{detail}" ] }
+              {
+                "id": "setup-option-art-slot",
+                "el": "span",
+                "layout": { "mode": "horizontal", "width": 32, "height": 32 },
+                "margin": { "right": "3" },
+                "children": [
+                  { "id": "setup-option-art", "component": "ProviderArtwork", "layout": { "width": 32, "height": 32 } }
+                ]
+              },
+              {
+                "id": "setup-option-text",
+                "el": "div",
+                "layout": { "mode": "vertical", "gap": "1", "grow": true },
+                "children": [
+                  { "id": "setup-option-title", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "bodyStrong", "color": "nativeText" }, "children": [ "{title}" ] },
+                  { "id": "setup-option-detail", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "caption", "color": "muted" }, "children": [ "{detail}" ] }
+                ]
+              },
+              {
+                "id": "setup-option-action-label",
+                "el": "span",
+                "layout": { "mode": "horizontal", "width": "hug" },
+                "margin": { "left": "3" },
+                "appearance": { "textStyle": "body", "color": "nativeText" },
+                "children": [ "{action}" ]
+              },
+              {
+                "id": "setup-option-chevron",
+                "el": "span",
+                "attrs": { "aria-hidden": "true" },
+                "margin": { "left": "infoIconGap" },
+                "appearance": { "textStyle": "setupActionIcon", "color": "nativeText" },
+                "children": [ "\uE76C" ]
+              }
             ]
           },
           {
-            "id": "setup-option-chevron",
-            "el": "span",
-            "attrs": {
-              "aria-hidden": "true",
-              "style": "font-family:'Segoe Fluent Icons','Segoe MDL2 Assets',sans-serif;font-size:12px"
-            },
-            "appearance": { "color": "muted" },
-            "children": [ "\uE76C" ]
+            "id": "setup-option-divider",
+            "el": "div",
+            "attrs": { "aria-hidden": "true" },
+            "layout": { "height": 1, "width": "fill" },
+            "appearance": { "background": "setupCardStroke" }
           }
         ]
       }
     },
     {
       "name": "CapabilityOptionRow",
-      "note": "Setup composite. A single capability-profile choice (CapabilitiesPage.xaml ListViewItem). Rows live inside a `surface` group with a 1px `line` border and `md` radius; each row is padded token `4` horizontal and `3` vertical (16,12) with a title (`body` BodyStrong) over a wrapping `caption` description in `muted`, and the recommended profile carries the RecommendedBadge. Single-selection follows focus; because it is selectable it shows the Fluent ListViewItem states: hover = SubtleFillColorSecondary (`subtleHover`), pressed = SubtleFillColorTertiary (`subtlePressed`); the selected row's accent pill/left bar is a WinUI ListViewItem template part and is a port note (no custom setter in setup XAML).",
+      "note": "CapabilitiesPage.xaml Balanced profile in a one-row group. The group owns the alpha-preserving CardBackgroundFillColorDefaultBrush backplate, 1px CardStrokeColorDefaultBrush border and 8px corners. Its transparent row has exact 16,12 padding. Body Strong title and the shared BadgeAccent sit together on the first line, 8px apart and vertically centered; Caption detail follows 4px below. Nested instances clear the standalone backplate so their enclosing group paints it once. Subtle hover/pressed are preview approximations; native ListView selection, focus and high-contrast template states remain native behavior.",
       "props": {
         "title": "Balanced",
-        "detail": "Recommended defaults for most Windows nodes."
+        "detail": "Commands, Canvas, screen capture and voice."
       },
       "root": {
         "id": "capability-row-root",
-        "el": "button",
-        "attrs": { "type": "button", "role": "option" },
-        "layout": {
-          "mode": "horizontal",
-          "gap": "2",
-          "padding": { "x": "4", "y": "3" },
-          "align": "center",
-          "width": "fill"
-        },
-        "appearance": {
-          "background": "$none",
-          "radius": "sm"
-        },
-        "control": {
-          "chrome": "none",
-          "focus": { "kind": "outline", "color": "accent" }
-        },
-        "states": {
-          "hover": { "background": "subtleHover" },
-          "pressed": { "background": "subtlePressed" },
-          "hoverPressed": { "background": "subtlePressed" }
-        },
+        "el": "div",
+        "layout": { "mode": "vertical", "width": "fill" },
+        "appearance": { "background": "setupCardFill", "borderColor": "setupCardStroke", "borderWidth": 1, "radius": "md" },
         "children": [
           {
-            "id": "capability-row-text",
-            "el": "div",
-            "layout": { "mode": "vertical", "gap": "1", "grow": true, "width": "fill" },
+            "id": "capability-row-action",
+            "el": "button",
+            "attrs": { "type": "button", "aria-label": "{title}: {detail}" },
+            "layout": {
+              "mode": "vertical",
+              "gap": "1",
+              "padding": { "x": "4", "y": "3" },
+              "align": "start",
+              "width": "fill"
+            },
+            "appearance": {
+              "background": "$none",
+              "borderWidth": 0,
+              "radius": "sm",
+              "textAlign": "left"
+            },
+            "control": {
+              "chrome": "none",
+              "focus": { "kind": "outline", "color": "accent" }
+            },
+            "states": {
+              "hover": { "background": "subtleHover" },
+              "pressed": { "background": "subtlePressed" },
+              "hoverPressed": { "background": "subtlePressed" }
+            },
             "children": [
-              { "id": "capability-row-title", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "body", "color": "ink" }, "children": [ "{title}" ] },
+              {
+                "id": "capability-row-heading",
+                "el": "div",
+                "layout": { "mode": "horizontal", "gap": "2", "align": "center", "width": "hug" },
+                "children": [
+                  { "id": "capability-row-title", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "bodyStrong", "color": "nativeText" }, "children": [ "{title}" ] },
+                  { "id": "capability-row-badge", "component": "BadgeAccent" }
+                ]
+              },
               { "id": "capability-row-detail", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "caption", "color": "muted" }, "children": [ "{detail}" ] }
             ]
-          },
-          { "id": "capability-row-badge", "component": "RecommendedBadge" }
+          }
         ]
       }
     },
@@ -3199,14 +3274,14 @@
     },
     {
       "name": "SetupWizardShell",
-      "note": "Setup composite. The onboarding wizard frame (Pages/WizardPage.xaml). A vertical page: a header (mascot + `title` TitleTextBlockStyle headline + `caption` status in `muted`), the active step surface, and a footer. Page padding is 40,4,40,24 (previewed with token `6` horizontal and `1`/`5` vertical; the 40px horizontals are off-grid port notes). The step card is a `surface` sheet with a 1px `line` border, `md` radius, and token `5` (24px) padding; its MinHeight (180/140/200/260) is a runtime port note. The footer places a standard (secondary) Button and the accent (primary) Button on the ends with the SetupProgressIndicator centered; footer column gap is token `2`. Composes Button and SetupProgressIndicator.",
+      "note": "Illustrative onboarding frame composed from shared controls, not an executable wizard. The capability group follows CapabilitiesPage.xaml: one setupCardFill backplate with a 1px setupCardStroke border and md corners behind transparent rows. The grouped preview has one straight, full-width 1px setupCardStroke separator between options, with no spacing or rounded ends. Balanced reuses CapabilityOptionRow with its standalone group paint cleared; Open has no recommended badge. Native 40,4,40,24 page padding is represented by chatGutter/1/5. The footer retains shared Button and SetupProgressIndicator instances; navigation, native minimum sizes and mascot behavior remain outside this preview.",
       "root": {
         "id": "setup-wizard-root",
         "el": "section",
         "layout": {
           "mode": "vertical",
           "gap": "5",
-          "padding": { "left": "6", "right": "6", "top": "1", "bottom": "5" },
+          "padding": { "left": "chatGutter", "right": "chatGutter", "top": "1", "bottom": "5" },
           "width": "fill"
         },
         "appearance": { "background": "paper" },
@@ -3223,15 +3298,45 @@
           {
             "id": "setup-wizard-card",
             "el": "div",
-            "layout": { "mode": "vertical", "gap": "4", "padding": "5", "width": "fill" },
-            "appearance": { "background": "surface", "borderColor": "line", "radius": "md" },
+            "layout": { "mode": "vertical", "gap": "2", "width": "fill" },
             "children": [
               { "id": "setup-wizard-card-title", "el": "h2", "appearance": { "fontFamily": "display", "textStyle": "subtitle", "color": "ink" }, "children": [ "Choose what this node can do" ] },
-              { "id": "setup-wizard-opt-1", "component": "CapabilityOptionRow" },
               {
-                "id": "setup-wizard-opt-2",
-                "component": "CapabilityOptionRow",
-                "props": { "title": "Full access", "detail": "Expose every capability over MCP." }
+                "id": "setup-wizard-option-group",
+                "el": "div",
+                "layout": { "mode": "vertical", "width": "fill" },
+                "appearance": { "background": "setupCardFill", "borderColor": "setupCardStroke", "borderWidth": 1, "radius": "md" },
+                "children": [
+                  {
+                    "id": "setup-wizard-opt-1",
+                    "component": "CapabilityOptionRow",
+                    "appearance": { "background": "$none", "borderColor": "$none", "borderWidth": 0, "radius": "$none" }
+                  },
+                  {
+                    "id": "setup-wizard-option-divider",
+                    "el": "div",
+                    "attrs": { "aria-hidden": "true" },
+                    "layout": { "width": "fill", "height": 1 },
+                    "appearance": { "background": "setupCardStroke", "radius": "$none" }
+                  },
+                  {
+                    "id": "setup-wizard-opt-2",
+                    "el": "button",
+                    "attrs": { "type": "button" },
+                    "layout": { "mode": "vertical", "gap": "1", "padding": { "x": "4", "y": "3" }, "width": "fill", "align": "start" },
+                    "appearance": { "background": "$none", "borderWidth": 0, "radius": "sm", "textAlign": "left" },
+                    "control": { "chrome": "none", "focus": { "kind": "outline", "color": "accent" } },
+                    "states": {
+                      "hover": { "background": "subtleHover" },
+                      "pressed": { "background": "subtlePressed" },
+                      "hoverPressed": { "background": "subtlePressed" }
+                    },
+                    "children": [
+                      { "id": "setup-wizard-open-title", "el": "span", "appearance": { "textStyle": "bodyStrong", "color": "nativeText" }, "children": [ "Open" ] },
+                      { "id": "setup-wizard-open-detail", "el": "span", "appearance": { "textStyle": "caption", "color": "muted" }, "children": [ "All eight capabilities, including Camera, Location and Browser control." ] }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -3240,9 +3345,9 @@
             "el": "div",
             "layout": { "mode": "horizontal", "gap": "2", "align": "center", "justify": "space-between", "width": "fill" },
             "children": [
-              { "id": "setup-wizard-back", "component": "Button", "props": { "children": "Back", "variant": "standard" } },
+              { "id": "setup-wizard-back", "component": "ButtonStandard", "props": { "children": "Back" }, "layout": { "width": 100 } },
               { "id": "setup-wizard-progress", "component": "SetupProgressIndicator" },
-              { "id": "setup-wizard-next", "component": "Button", "props": { "children": "Continue", "variant": "primary" } }
+              { "id": "setup-wizard-next", "component": "Button", "props": { "children": "Continue" }, "layout": { "width": 100 } }
             ]
           }
         ]
@@ -3293,7 +3398,7 @@
               { "id": "settings-card-detail", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "caption", "color": "muted" }, "children": [ "{detail}" ] }
             ]
           },
-          { "id": "settings-card-action", "component": "Button", "props": { "children": "Change", "variant": "standard" } }
+          { "id": "settings-card-action", "component": "ButtonStandard", "props": { "children": "Change" } }
         ]
       }
     },
@@ -3443,140 +3548,6 @@
               { "id": "settings-window-section", "component": "SettingsSectionHeader", "props": { "children": "General" } },
               { "id": "settings-window-row-1", "component": "SettingsToggleRow" },
               { "id": "settings-window-row-2", "component": "SettingsExpanderRow" }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "name": "ExampleScreen",
-      "note": "A representative Connection screen composed from the pieces above — the \"does it hang together\" check for the whole system. The status board is a freeform layer so the two cards can overlap into a Fluent-style dashboard, exercising v3 absolute positioning alongside Auto Layout.",
-      "root": {
-        "id": "example-screen-root",
-        "el": "section",
-        "class": "ds-screen",
-        "layout": {
-          "mode": "vertical",
-          "gap": "5",
-          "width": "fill"
-        },
-        "children": [
-          {
-            "id": "example-screen-head",
-            "el": "header",
-            "class": "ds-screen-head",
-            "layout": {
-              "mode": "horizontal",
-              "gap": "4",
-              "align": "start",
-              "justify": "space-between",
-              "width": "fill"
-            },
-            "children": [
-              {
-                "id": "example-screen-heading",
-                "el": "div",
-                "layout": {
-                  "mode": "vertical",
-                  "gap": "1"
-                },
-                "children": [
-                  {
-                    "id": "example-screen-eyebrow",
-                    "el": "p",
-                    "class": "ds-eyebrow",
-                    "children": [
-                      "Connection"
-                    ]
-                  },
-                  {
-                    "id": "example-screen-title",
-                    "el": "h2",
-                    "class": "ds-screen-title",
-                    "children": [
-                      "OpenClaw Windows Hub"
-                    ]
-                  }
-                ]
-              },
-              {
-                "id": "example-screen-status",
-                "component": "Badge",
-                "props": {
-                  "tone": "positive",
-                  "children": "Connected"
-                }
-              }
-            ]
-          },
-          {
-            "id": "example-screen-board",
-            "el": "div",
-            "class": "ds-grid",
-            "layout": {
-              "mode": "horizontal",
-              "width": "fill",
-              "height": 176,
-              "gap": "3"
-            },
-            "children": [
-              {
-                "id": "example-screen-gateway",
-                "component": "Card",
-                "props": {
-                  "title": "Gateway",
-                  "body": "Paired to OpenClawGateway · last seen just now."
-                },
-                "layout": {
-                  "width": 280,
-                  "height": 148
-                }
-              },
-              {
-                "id": "example-screen-node",
-                "component": "Card",
-                "props": {
-                  "title": "Windows node",
-                  "body": "6 capabilities exposed over MCP."
-                },
-                "layout": {
-                  "width": 280,
-                  "height": 148
-                }
-              }
-            ]
-          },
-          {
-            "id": "example-screen-row",
-            "el": "div",
-            "class": "ds-row",
-            "layout": {
-              "mode": "horizontal",
-              "gap": "4",
-              "align": "end",
-              "wrap": true,
-              "width": "fill"
-            },
-            "children": [
-              {
-                "id": "example-screen-field",
-                "component": "Field",
-                "props": {
-                  "label": "Gateway address",
-                  "placeholder": "127.0.0.1:18789"
-                },
-                "layout": {
-                  "grow": true
-                }
-              },
-              {
-                "id": "example-screen-connect",
-                "component": "Button",
-                "props": {
-                  "children": "Connect",
-                  "variant": "primary"
-                }
-              }
             ]
           }
         ]
