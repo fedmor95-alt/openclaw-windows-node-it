@@ -255,6 +255,7 @@ spacing:
   infoIconGap: 14px
   chatGutter: 40px
   workspaceSelectorEnd: 28px
+  settingsItemEnd: 44px
 rounded:
   sm: 4px
   md: 8px
@@ -294,7 +295,7 @@ x-colophon:
       - id: settings
         name: Settings
         description: Settings patterns, workspace chrome, identity controls, and flyouts.
-        content: Production reference from OpenClaw.Tray.WinUI settings pages, HubWindow, and the Home and Sessions workspace. The trailing control owns interaction on static settings cards. Shared building blocks remain in Components.
+        content: References from OpenClaw.Tray.WinUI settings pages, HubWindow, and the Home and Sessions workspace. Iconless settings rows share the setup backplate and 16px left text inset. Ordinary rows and expanded children stay passive around their trailing actions; the entire expander header has hover/pressed feedback and immediate browser-native expand/collapse. Native WinUI animation remains a port requirement. The Settings shell sample has no left pane. Shared building blocks remain in Components.
         components:
           - SettingsSectionHeader
           - SettingsCard
@@ -430,11 +431,11 @@ x-colophon:
       setupCardFill:
         resource: CardBackgroundFillColorDefaultBrush
         themes: { dark: "#ffffff0d", highContrast: "#000000" }
-        usage: Alpha-preserving backplate for setup choice groups. Paint once behind transparent rows, not on every nested row.
+        usage: Shared alpha-preserving backplate for setup choice groups and settings cards. Paint once behind transparent rows, not on every nested row.
       setupCardStroke:
         resource: CardStrokeColorDefaultBrush
         themes: { dark: "#00000019", highContrast: "#ffffff" }
-        usage: Native 1px setup group border and resting CompactChoice bottom divider. Unlike the generic line swatch, preserves native alpha.
+        usage: Native 1px setup/settings frame border and dividers. Unlike the generic line swatch, preserves native alpha.
       setupOptionDisabled:
         resource: SettingsCardBackgroundDisabled
         themes: { dark: "#ffffff0b", highContrast: "#000000" }
@@ -895,7 +896,7 @@ Personality: native, trustworthy, calm, precise.
 - **accent** {colors.accent}: Primary actions, links, selection, focus. Follows SystemAccentColor (default AccentDark1 on light).
 - **accentInk** {colors.accentInk}: Text/glyphs on accent fills.
 - **accentText** {colors.accentText}: `AccentTextFillColorPrimaryBrush` for outlined accent badge text and border. It uses Dark2 in light and Light3 in dark, not the primary button fill palette.
-- **Setup choice groups:** {colors.setupCardFill} and {colors.setupCardStroke} preserve `CardBackgroundFillColorDefaultBrush` and `CardStrokeColorDefaultBrush`, including their alpha. The group owns the backplate and 1px border; row hover/pressed fills are separate layers.
+- **Setup and settings cards:** {colors.setupCardFill} and {colors.setupCardStroke} preserve `CardBackgroundFillColorDefaultBrush` and `CardStrokeColorDefaultBrush`, including their alpha. The frame owns the single backplate and 1px border. Setup choice rows and actionable expander headers have separate hover/pressed layers; ordinary settings rows and expanded children stay static around their action controls. Existing token names are retained because both surfaces bind the same native resources.
 - **positive** {colors.positive}: Success / connected states. Fluent SystemFillColorSuccess.
 - **warning** {colors.warning}: Warnings / attention. Fluent SystemFillColorCaution.
 - **critical** {colors.critical}: Errors, disconnected, destructive. Fluent SystemFillColorCritical.
@@ -983,7 +984,7 @@ The landing window is the native Home and Sessions workspace (`Windows/Workspace
 - **Menu.** Home is a 36px row with 4px horizontal and 2px vertical outer margins, a 3x16 accent indicator and the original `Chat.svg` at 22px centered in a 24px column. The iconless native presenter reserves 8px before that column, followed by a 16px gap to Home. The Sessions header is 40px tall with 16px leading and 4px trailing insets, 14px semibold text, and a 40x36 add button. No conversations to show replaces session rows in the supplied state; add is disabled while disconnected.
 - **Owner footer.** The PaneFooter uses 4,8,4,8 margins and a 4px column gap. The Owner button is the shared `UserIdentityBadge`, with native SubtleButton states, 8px padding and a retained 1px border, a 24px PersonPicture, 12px column spacing and a 10px status dot followed by a 4px gap and Caption text. `statusTone` follows connection state, never authorization. It reads the authenticated `users.self` profile or falls back to Owner. The notification button is 40x36 with 8px padding, vertically centered against Owner, containing the original 20px `Notifications.svg` and a 16px InfoBadge offset -6px above and 8px beyond the icon's right edge.
 - **Connection status.** `Controls/GatewayStatusContent.xaml` is a 304px flyout of Gateway, Operator, and Node rows split by 1px `line` dividers, closing with an Open Connection link. Each row pairs a 10px status dot with a body-strong label over a caption `muted` detail, and reveals an `accent` action link (Reconnect, Approve) only when that layer needs one. The dot binds the Fluent system fill for its state: `positive` connected, `warning` attention, `critical` error, `muted` unknown, never color alone.
-- **Notifications.** `Controls/NotificationFlyoutContent.xaml` is a 352px flyout: a Clear all link, a list of notification cards, and a footer pairing Open notifications with an active-count caption. Each card is a `surface` panel with a 1px `line` border, `md` (8px) corners, and 12px padding, laying out a leading severity glyph, a title/message/metadata stack, and a dismiss button; a recurrence count rides a `warning` badge beside the title. An empty state swaps the list for one centered card.
+- **Notifications.** `Controls/NotificationFlyoutContent.xaml` is a 352px content column: a Clear all link, a list of notification cards, and a footer pairing Open notifications with an active-count caption. The preview now includes a presenter backplate around the whole column, not just the individual cards: a `surface` fill, 1px `line` frame, `md` (8px) corners, `md` drop shadow and 12px inset. The 378px border box preserves the 352px content width. A transparent 32px outer margin gives the shadow room inside Colophon's overflow-clipped portal; this is preview clearance, not native content padding or exact popup placement. Each notification card retains its own `surface` panel, 1px `line` border, `md` corners, and 12px padding, laying out a severity glyph, title/message/metadata stack, and dismiss button; a recurrence count rides a `warning` badge beside the title. An empty state swaps the list for one centered card. Production keeps the stock [FlyoutPresenter](https://github.com/microsoft/microsoft-ui-xaml/blob/09cfc8ff3fbf556166dd813ae9b81646716f54bf/controls/dev/CommonStyles/FlyoutPresenter_themeresources.xaml): bind `FlyoutPresenterBackground`, `FlyoutBorderThemeBrush`, `FlyoutContentPadding` and the native platform shadow rather than copying the solid browser sheet or shadow values. The browser's 12px inset approximates native 16,15,16,17 padding, and its 1px frame does not simulate the native 2px high-contrast override.
 - **Artwork and glyphs.** Pane, Back, Forward and Add use actual Segoe Fluent glyphs U+E90C, U+E76B, U+E76C and U+E710 at 16px, not hand-drawn SVG substitutes. Home and Notifications use exact production SVG bytes, including their authored gradients; these are artwork, not theme-color tokens. The title uses `BrandAssets.RedBotMarkUri` at 16px with a 16px gap before its 12px title. Native caption glyph references are U+E921, U+E922 and U+E8BB. The owner fallback uses PersonPicture's Contact glyph U+E77B at 24 * 0.42 = 10.08px.
 - **Content.** One `NavigationViewContentBackground` layer uses `chatLayer`, with a 1px top/left `line` stroke and the native 8,0,0,0 corner shape (`workspaceContent`). The disconnected placeholder is centered: U+E8F2 at 48px, Subtitle text, and the standard 32px Open Connection button, separated by 12px gaps.
 
@@ -1032,6 +1033,45 @@ These references follow production commit `0131e4ce1f7937b22c69b289564087061687f
 - **Capability option:** the same group backplate surrounds a transparent ListViewItem with 16,12 padding. Body Strong title and BadgeAccent share the first line with an 8px gap; Caption detail follows 4px below. A full-width right-aligned badge is not the production layout. Nested rows in SetupWizardShell clear their standalone group paint so the parent paints the backplate once. The grouped wizard example adds one straight, full-width 1px `setupCardStroke` separator between options, with no gap or rounded divider ends.
 
 The catalog deliberately gives SetupOptionCard the same hover/pressed treatment as CapabilityOptionRow: `subtleHover` / `subtlePressed`, `sm` corners, and the shared renderer transition. The outer border and bottom divider stay `setupCardStroke`, with no extra hover underline. Pointer exit restores transparency without changing layout or tinting text/artwork. This user-directed preview choice differs from the stock SettingsCard state brushes, gradient border and 83ms transition; it does not change shipping code. Native minimum sizes, the action label's 112px maximum width, SettingsCard adaptive reflow, ListView selection/focus visuals, and provider image loading remain native behavior. Both preview controls use transparent interaction fills in high contrast, rather than simulating native system-highlight states.
+
+### Settings cards and disclosure feedback
+
+SettingsCard, SettingsToggleRow and SettingsExpanderRow reuse the setup cards' `setupCardFill` backplate, 1px `setupCardStroke` border and `md` outer corners. These map to the actual `CardBackgroundFillColorDefaultBrush` / `CardStrokeColorDefaultBrush` pair used by the hand-rolled Borders in `Pages/SettingsPage.xaml`, rather than painting the page background on the card. No new palette or duplicate control definitions are needed.
+
+The supplied Windows Settings screenshot guides alignment and spacing, not a new set of icons. OpenClaw's examples are iconless: SettingsCard, SettingsToggleRow, the expander header and its children all start text 16px inside the frame. There is no leading icon, empty icon column, or 58px child indentation. Body titles and Caption descriptions are left-aligned with zero stack gap and a 24px margin before trailing controls. Standalone cards use 16px padding and a content-derived 68px inner height for the shown two-line labels (70px including the frame). The expander header and expanded child use the same 20px/16px text line heights and 16px top/bottom padding, so both two-line rows are equally tall. SettingsWindowShell uses a 4px gap between cards. Its General section heading uses `bodyStrong` (`BodyStrongTextBlockStyle`, 14/20 SemiBold), as do other shared SettingsSectionHeader instances.
+
+SettingsCard, SettingsToggleRow and the expanded child have **no row-wide hover or pressed states**. Their wrappers are plain, non-focusable containers; clicking text/background cannot activate Change or toggle a switch. The expander header is the exception: its entire surface is one disclosure target with `subtleHover` / `subtlePressed` feedback, not a passive row with a separate chevron button. Click, Enter and Space expand/collapse it. ToggleSwitch retains its independent state and keyboard activation behavior; clicking the expanded switch does not collapse the header. Setup choice-row feedback is unchanged.
+
+SettingsWindowShell is a content-only sample: the left navigation subtree is removed, not hidden or reduced to zero width. Its content fills the available width with 24px padding. This is a user-directed catalog change, not a change to the shipping HubWindow NavigationView or the separate WorkspaceShell.
+
+The expander group has one straight, full-width 1px divider and one backplate. The child uses the shared ToggleSwitch inside the adapted Toolkit item layout, not a padded standalone SettingsToggleRow inside another padded container. Standalone and expanded switches both center their 40x20 track in a 36px-high control slot. SettingsWindowShell references these same definitions. High-contrast previews retain the system-colored frame; they do not claim native Windows high-contrast proof.
+
+### Toolkit settings expander geometry
+
+SettingsExpanderRow uses Community Toolkit's [SettingsExpander template](https://github.com/CommunityToolkit/Windows/blob/34a57f969bf7966e0a3cbe9d4d10a47758d097a0/components/SettingsControls/src/SettingsExpander/SettingsExpander.xaml) and [SettingsCard template](https://github.com/CommunityToolkit/Windows/blob/34a57f969bf7966e0a3cbe9d4d10a47758d097a0/components/SettingsControls/src/SettingsCard/SettingsCard.xaml) as geometry references, with user-directed iconless alignment, equal two-line row spacing and full-header disclosure feedback. Production SandboxPage uses a stock WinUI Expander and intentionally does not use the Toolkit's item indentation. Application code remains unchanged.
+
+| Part | Preview value and Toolkit provenance |
+| --- | --- |
+| Header padding (left, top, right, bottom) | 16,16,4,16, matching native Toolkit SettingsCard |
+| HeaderPanel margin | 0,0,24,0 |
+| Title / description stack spacing | 0; Body 14/20 above Caption 12/16, both left-aligned |
+| Disclosure affordance | 32x32 decorative slot, margin 0,0,8,0, centered 16px Segoe Fluent ChevronDown glyph; part of the full-header target, not a second button |
+| Expanded content wrapper padding / spacing | 0 / 0 |
+| Non-clickable item padding | 16,16,44,16 (`4`, `4`, `settingsItemEnd`, `4`); replaces Toolkit's 58px leading icon indentation with the shared 16px text inset and increases its 8px top/bottom padding to match the header |
+| Item HeaderPanel margin | 0,0,24,0 |
+| RightAlignedCompactToggleSwitchStyle slot | Height 36, shared track 40x20 centered vertically |
+
+Both the header and child interiors measure 68px for the shown two-line labels (20+16 text, 16px top and bottom padding). The child's 36px control slot fits that same text height; its 1px top separator is separate. The displayed shared frame is therefore 139px tall: 1px top + 68px header + 1px separator + 68px item + 1px bottom. These are content-derived sizes, not fixed heights that clip wrapped descriptions.
+
+Native `SettingsCardMinHeight=68`, `DefaultSettingsExpanderItemStyle.MinHeight=52`, `SettingsExpanderContentMinHeight=16`, and `MinWidth=148` remain implementation requirements. Colophon's semantic layout has no minimum-size fields, so empty-header variants and native wrapping breakpoints are not reproduced by inventing fixed heights or raw CSS. The native template's content presenter also overlaps separate borders with margin `0,-2,0,0`; the catalog instead paints one frame and one divider and does not claim identical native outer height. Native high-contrast border thickness and glyph rasterization remain native. The removed icon indentation, increased item vertical padding, fixed chevron direction, shared backplate, 8px outer corners and header-wide feedback are catalog adaptations, not a pixel-identical reproduction of the screenshot.
+
+### Expander behavior and native motion reference
+
+The preview uses native HTML `details` / `summary`, initially open, rather than Colophon's switch-only boolean action. This gives each instance a real disclosure state and browser-managed expanded accessibility, keeps the child switch mounted across collapse/reopen, and excludes collapsed descendants from layout and keyboard navigation. The header is one keyboard target with no nested action. Horizontal Auto Layout on the summary removes the browser triangle without an RTL workaround and restores the trailing Fluent chevron slot. The actual U+E70D glyph uses the existing 16/16 Fluent-icon typography token; it is decorative and retains the original downward direction in both states. State-linked chevron direction remains unimplemented, while native disclosure owns the accessible expanded state. The browser focus outline remains a fallback.
+
+The animation reference is WinUI's [Expander.xaml](https://github.com/microsoft/microsoft-ui-xaml/blob/09cfc8ff3fbf556166dd813ae9b81646716f54bf/controls/dev/Expander/Expander.xaml), together with [Expander.cpp](https://github.com/microsoft/microsoft-ui-xaml/blob/09cfc8ff3fbf556166dd813ae9b81646716f54bf/controls/dev/Expander/Expander.cpp) and its [header template](https://github.com/microsoft/microsoft-ui-xaml/blob/09cfc8ff3fbf556166dd813ae9b81646716f54bf/controls/dev/Expander/Expander_themeresources.xaml). For downward expansion, content becomes visible and translates from negative measured content height to zero in **333ms**, with spline **(0,0,0,1)**. Closing translates back in **167ms**, with spline **(1,1,0,1)**, then sets visibility to Collapsed. A composition inset clip prevents content crossing the header. `AnimatedChevronUpDownSmallVisualSource` owns the native chevron's checked/unchecked and pointer states; this is not a generic 180-degree CSS rotation.
+
+**Animation is not implemented in this preview.** ToggleSwitch became animatable after Colophon gained persistent boolean state and numeric geometry transitions. Expander can follow that same upstream-extension approach, but it additionally needs disclosure semantics, measured-height clipping, visibility/focus timing and state-linked chevrons. Those capabilities are not present in the installed read-only renderer; this is a missing feature, not an inherent inability to animate expanders. Browser-native disclosure therefore opens/closes immediately; it does not pretend that a zero-height, still-focusable container is collapsed. Preserve the stock WinUI animation and system motion settings in production. A faithful animated browser reference needs separately scoped renderer support. Browser behavior/geometry proof remains pending and is not native pixel or Windows high-contrast proof.
 
 StatusDot is a non-interactive 10x10 indicator with `pill` corners and a semantic fill. Its standalone preview uses explicit Auto Layout so the empty span retains its width and height instead of collapsing as inline text.
 

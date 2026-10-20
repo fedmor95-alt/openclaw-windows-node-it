@@ -1852,7 +1852,7 @@
     },
     {
       "name": "NotificationFlyout",
-      "note": "App notifications flyout from Controls/NotificationFlyoutContent.xaml (#1541), opened from the Workspace footer bell. A 352px column: a right-aligned Clear all link, a scrolling list of notification cards, and a footer pairing an Open notifications link with a tertiary active-count caption. Each card is a `surface` (CardBackgroundFillColorDefault) panel with a 1px `line` border, `md` (8px) radius and 12px (token 3) padding, laying out a leading severity glyph, a stack of body-strong title + caption message + caption `muted` metadata, and a trailing dismiss button. A recurrence count rides a `warning` Badge beside the title. An empty state swaps the list for a single centered card. Severity glyphs are Segoe Fluent Icons in-app; previewed here with a stroked alert glyph.",
+      "note": "App notifications flyout from Controls/NotificationFlyoutContent.xaml (#1541), opened from the Workspace footer bell. The preview includes its presenter backplate: a surface sheet, 1px line frame, md (8px) corners, md drop shadow and 12px inset, consistent with the ConnectionStatusFlyout reference. Its 378px border box preserves the 352px content column. A transparent 32px outer margin leaves room for the shadow inside Colophon's overflow-clipped flyout portal; it is preview clearance, not native content padding or exact popup placement. Production keeps the stock FlyoutPresenter with FlyoutPresenterBackground (AcrylicInAppFillColorDefaultBrush), FlyoutBorderThemeBrush, FlyoutContentPadding and platform shadow; the solid surface and named shadow are browser approximations. The content has a right-aligned Clear all link, notification cards, and a footer pairing Open notifications with an active-count caption. Each card retains its surface panel, 1px line border, md radius and 12px padding, with a leading severity glyph, title/message/metadata stack and dismiss button. A recurrence count rides a warning Badge beside the title. An empty state swaps the list for a centered card. Severity glyphs are Segoe Fluent Icons in-app; previewed here with a stroked alert glyph.",
       "props": {
         "title": "Approval required",
         "message": "A Windows node capability is waiting for your approval.",
@@ -1865,7 +1865,17 @@
         "layout": {
           "mode": "vertical",
           "gap": "2",
-          "width": 352
+          "padding": "3",
+          "width": 378
+        },
+        "margin": "6",
+        "appearance": {
+          "background": "surface",
+          "borderColor": "line",
+          "borderWidth": 1,
+          "color": "ink",
+          "radius": "md",
+          "shadow": "md"
         },
         "children": [
           {
@@ -3355,19 +3365,19 @@
     },
     {
       "name": "SettingsSectionHeader",
-      "note": "Settings control. The group label above a stack of settings cards (used across SettingsPage / PermissionsPage / SandboxPage). Non-interactive. `body` BodyStrongTextBlockStyle in `ink`, with margin 4,18,4,4 (previewed as token `1` sides, `4` top, `1` bottom; the 18px top is off-grid and a port note).",
+      "note": "Settings control. The group label above a stack of settings cards (used across SettingsPage / PermissionsPage / SandboxPage), including General in SettingsWindowShell. Non-interactive. `bodyStrong` BodyStrongTextBlockStyle in `ink` gives the heading semibold weight without changing its 14px size or 20px line height, with margin 4,18,4,4 (previewed as token `1` sides, `4` top, `1` bottom; the 18px top is off-grid and a port note).",
       "props": { "children": "Permissions" },
       "root": {
         "id": "settings-section-header-root",
         "el": "h2",
         "margin": { "top": "4", "right": "1", "bottom": "1", "left": "1" },
-        "appearance": { "fontFamily": "body", "textStyle": "body", "color": "ink" },
+        "appearance": { "fontFamily": "body", "textStyle": "bodyStrong", "color": "ink" },
         "children": [ "{children}" ]
       }
     },
     {
       "name": "SettingsCard",
-      "note": "Settings composite. The canonical settings row (hand-rolled Border, not the toolkit SettingsCard). STATIC: the card itself has no hover/pressed; the trailing control owns interaction. A `surface`-less `paper` Border with a 1px `line` (CardStrokeColorDefault) stroke, `md` radius (8px), and token `4` (16px) padding (some cards use 16,14; the 14 is off-grid). Layout is an optional 36px leading icon column, a growing content column (title `body` BodyStrong in `ink` over a wrapping `caption` description in `muted`), and a trailing Auto control column. Cards stack with token `2` (8px) spacing.",
+      "note": "Settings composite derived from SettingsPage.xaml's hand-rolled Border, with iconless Windows Settings alignment. The outer frame paints CardBackgroundFillColorDefaultBrush once, with a 1px CardStrokeColorDefaultBrush border and md (8px) corners. The passive row has 16px padding, no leading icon or reserved gutter, and a growing left-aligned Body/Caption column with no title/detail gap and a 24px trailing margin. Only the normal Change button has hover/pressed states or a keyboard stop. The row and backplate stay unchanged under the pointer. The two-line sample is content-sized at 68px inside its 1px frame, not a fixed height.",
       "props": {
         "title": "Startup",
         "detail": "Launch OpenClaw when you sign in to Windows."
@@ -3375,36 +3385,34 @@
       "root": {
         "id": "settings-card-root",
         "el": "div",
-        "layout": { "mode": "horizontal", "gap": "3", "padding": "4", "align": "center", "width": "fill" },
-        "appearance": { "background": "paper", "borderColor": "line", "radius": "md" },
+        "layout": { "mode": "vertical", "width": "fill" },
+        "appearance": { "background": "setupCardFill", "borderColor": "setupCardStroke", "borderWidth": 1, "radius": "md" },
         "children": [
           {
-            "id": "settings-card-icon",
-            "el": "span",
-            "attrs": {
-              "aria-hidden": "true",
-              "style": "font-family:'Segoe Fluent Icons','Segoe MDL2 Assets',sans-serif;font-size:16px"
-            },
-            "layout": { "mode": "horizontal", "align": "center", "justify": "center", "width": 36 },
-            "appearance": { "color": "ink" },
-            "children": [ "\uE7E8" ]
-          },
-          {
-            "id": "settings-card-text",
+            "id": "settings-card-row",
             "el": "div",
-            "layout": { "mode": "vertical", "gap": "1", "grow": true, "width": "fill" },
+            "layout": { "mode": "horizontal", "gap": "0", "padding": "4", "align": "center", "width": "fill" },
+            "appearance": { "background": "$none", "textAlign": "left" },
             "children": [
-              { "id": "settings-card-title", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "body", "color": "ink" }, "children": [ "{title}" ] },
-              { "id": "settings-card-detail", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "caption", "color": "muted" }, "children": [ "{detail}" ] }
+              {
+                "id": "settings-card-text",
+                "el": "div",
+                "layout": { "mode": "vertical", "gap": "0", "grow": true },
+                "margin": { "right": "5" },
+                "children": [
+                  { "id": "settings-card-title", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "body", "color": "ink" }, "children": [ "{title}" ] },
+                  { "id": "settings-card-detail", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "caption", "color": "muted" }, "children": [ "{detail}" ] }
+                ]
+              },
+              { "id": "settings-card-action", "component": "ButtonStandard", "props": { "children": "Change" } }
             ]
-          },
-          { "id": "settings-card-action", "component": "ButtonStandard", "props": { "children": "Change" } }
+          }
         ]
       }
     },
     {
       "name": "SettingsToggleRow",
-      "note": "Settings composite. A SettingsCard whose trailing control is the Fluent ToggleSwitch (the most common settings row). Same static `paper` card: 1px `line` stroke, `md` radius, token `4` padding, token `1` title/detail stack. The ToggleSwitch owns the hover/pressed states (see ToggleSwitch); the card is static. Composes ToggleSwitch.",
+      "note": "Settings composite with the same single setupCardFill backplate, 1px setupCardStroke border and md corners as SettingsCard. The passive row has 16px padding and no icon gutter. Its left-aligned Body/Caption column has no title/detail gap and a 24px trailing margin. Only the shared ToggleSwitch has hover/pressed states, changes checked state, or participates in keyboard navigation. Its native 40x20 track is centered in a 36px-high compact control slot. The two-line sample is 68px inside its frame. SettingsExpanderRow reuses ToggleSwitch directly in its own item layout, not this padded standalone card. Shipping behavior is unchanged.",
       "props": {
         "title": "Run at startup",
         "detail": "Start the OpenClaw tray automatically."
@@ -3412,45 +3420,58 @@
       "root": {
         "id": "settings-toggle-root",
         "el": "div",
-        "layout": { "mode": "horizontal", "gap": "3", "padding": "4", "align": "center", "width": "fill" },
-        "appearance": { "background": "paper", "borderColor": "line", "radius": "md" },
+        "layout": { "mode": "vertical", "width": "fill" },
+        "appearance": { "background": "setupCardFill", "borderColor": "setupCardStroke", "borderWidth": 1, "radius": "md" },
         "children": [
           {
-            "id": "settings-toggle-text",
+            "id": "settings-toggle-row",
             "el": "div",
-            "layout": { "mode": "vertical", "gap": "1", "grow": true, "width": "fill" },
+            "layout": { "mode": "horizontal", "gap": "0", "padding": "4", "align": "center", "width": "fill" },
+            "appearance": { "background": "$none", "textAlign": "left" },
             "children": [
-              { "id": "settings-toggle-title", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "body", "color": "ink" }, "children": [ "{title}" ] },
-              { "id": "settings-toggle-detail", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "caption", "color": "muted" }, "children": [ "{detail}" ] }
+              {
+                "id": "settings-toggle-text",
+                "el": "div",
+                "layout": { "mode": "vertical", "gap": "0", "grow": true },
+                "margin": { "right": "5" },
+                "children": [
+                  { "id": "settings-toggle-title", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "body", "color": "ink" }, "children": [ "{title}" ] },
+                  { "id": "settings-toggle-detail", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "caption", "color": "muted" }, "children": [ "{detail}" ] }
+                ]
+              },
+              {
+                "id": "settings-toggle-control",
+                "el": "div",
+                "layout": { "mode": "horizontal", "align": "center", "justify": "center", "width": 40, "height": 36 },
+                "children": [
+                  { "id": "settings-toggle-switch", "component": "ToggleSwitch", "props": { "label": "{title}" } }
+                ]
+              }
             ]
-          },
-          { "id": "settings-toggle-switch", "component": "ToggleSwitch", "props": { "label": "{title}" } }
+          }
         ]
       }
     },
     {
       "name": "SettingsExpanderRow",
-      "note": "Settings composite. An expandable settings group built on the stock WinUI Expander (SandboxPage.xaml), not the toolkit SettingsExpander. The header is an interactive row (ColumnSpacing 14, previewed token `3`; header padding 0,4) with an optional leading icon, a growing title (`body` BodyStrong) over `caption` description, and a trailing chevron (U+E70D) that rotates when open. The header carries stock Expander subtle states: hover = SubtleFillColorSecondary (`subtleHover`), pressed = SubtleFillColorTertiary (`subtlePressed`). The expanded content is a StackPanel, token `3` (12px) spacing, padding 0,4. Previewed expanded.",
+      "note": "Settings composite based on Community Toolkit SettingsExpander/SettingsCard at 34a57f969bf7966e0a3cbe9d4d10a47758d097a0, adapted to the requested iconless Windows Settings alignment. The entire header is one disclosure target with subtleHover/subtlePressed feedback, click/Enter/Space activation and browser-native expanded accessibility. The child row remains passive except for its shared ToggleSwitch. Native details/summary keeps each instance independent, preserves child switch state, and removes collapsed content from layout and keyboard navigation without shrinking focusable children to zero. Starts expanded. Header and child have a 16px left inset, 16px vertical padding, zero title/detail gap, a 24px trailing text margin, Body 20px and Caption 16px line heights: both shown rows are content-sized at 68px. The flex summary removes the browser triangle and RTL workaround. Header padding is 16,16,4,16; the trailing 32x32 slot has 8px right margin and a centered 16px Segoe Fluent ChevronDown glyph. This decorative span is part of the same header target, not a second button. The glyph retains the original fixed downward direction; state-linked direction and animation remain unimplemented. Child padding is 16,16,44,16, with the shared 40x20 switch centered in a 36px slot; no wrapper padding. WinUI Expander.xaml at 09cfc8ff3fbf556166dd813ae9b81646716f54bf animates downward opening from negative measured content height to zero over 333ms (0,0,0,1), and closing back over 167ms (1,1,0,1) before collapsing visibility. Its clipped translation and AnimatedChevronUpDownSmallVisualSource need additional disclosure support beyond the installed Colophon toggle transitions, so this preview opens/closes immediately. Native animation, system motion preferences, minimums and adaptive reflow remain port requirements. Application code is unchanged.",
       "props": {
         "title": "Advanced sandbox",
         "detail": "Fine-tune the command execution sandbox."
       },
       "root": {
         "id": "settings-expander-root",
-        "el": "div",
-        "layout": { "mode": "vertical", "width": "fill" },
-        "appearance": { "background": "paper", "borderColor": "line", "radius": "md" },
+        "el": "details",
+        "attrs": { "open": "" },
+        "layout": { "mode": "none", "width": "fill" },
+        "appearance": { "background": "setupCardFill", "borderColor": "setupCardStroke", "borderWidth": 1, "radius": "md" },
         "children": [
           {
             "id": "settings-expander-header",
-            "el": "button",
-            "attrs": { "type": "button", "aria-expanded": "true" },
-            "layout": { "mode": "horizontal", "gap": "3", "padding": { "x": "4", "y": "3" }, "align": "center", "width": "fill" },
-            "appearance": { "background": "$none", "radius": "md" },
-            "control": {
-              "chrome": "none",
-              "focus": { "kind": "outline", "color": "accent" }
-            },
+            "el": "summary",
+            "attrs": { "role": "button", "tabindex": "0", "aria-label": "{title}" },
+            "layout": { "mode": "horizontal", "gap": "0", "padding": { "left": "4", "top": "4", "right": "1", "bottom": "4" }, "align": "center", "width": "fill" },
+            "appearance": { "background": "$none", "borderWidth": 0, "radius": "md", "color": "ink", "textAlign": "left" },
             "states": {
               "hover": { "background": "subtleHover" },
               "pressed": { "background": "subtlePressed" },
@@ -3458,32 +3479,78 @@
             },
             "children": [
               {
-                "id": "settings-expander-text",
-                "el": "div",
-                "layout": { "mode": "vertical", "gap": "1", "grow": true, "width": "fill" },
+                "id": "settings-expander-header-card",
+                "el": "span",
+                "layout": { "mode": "vertical", "padding": "0", "grow": true },
                 "children": [
-                  { "id": "settings-expander-title", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "body", "color": "ink" }, "children": [ "{title}" ] },
-                  { "id": "settings-expander-detail", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "caption", "color": "muted" }, "children": [ "{detail}" ] }
+                  {
+                    "id": "settings-expander-text",
+                    "el": "span",
+                    "layout": { "mode": "vertical", "gap": "0" },
+                    "margin": { "right": "5" },
+                    "appearance": { "textAlign": "left" },
+                    "children": [
+                      { "id": "settings-expander-title", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "body", "color": "ink" }, "children": [ "{title}" ] },
+                      { "id": "settings-expander-detail", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "caption", "color": "muted" }, "children": [ "{detail}" ] }
+                    ]
+                  }
                 ]
               },
               {
-                "id": "settings-expander-chevron",
+                "id": "settings-expander-chevron-slot",
                 "el": "span",
-                "attrs": {
-                  "aria-hidden": "true",
-                  "style": "font-family:'Segoe Fluent Icons','Segoe MDL2 Assets',sans-serif;font-size:12px"
-                },
-                "appearance": { "color": "muted" },
-                "children": [ "\uE70D" ]
+                "attrs": { "aria-hidden": "true" },
+                "layout": { "mode": "horizontal", "align": "center", "justify": "center", "width": 32, "height": 32 },
+                "margin": { "right": "2" },
+                "children": [
+                  {
+                    "id": "settings-expander-chevron",
+                    "el": "span",
+                    "appearance": { "textStyle": "chatIcon", "color": "ink" },
+                    "children": [ "\uE70D" ]
+                  }
+                ]
               }
             ]
           },
           {
+            "id": "settings-expander-divider",
+            "el": "div",
+            "attrs": { "aria-hidden": "true" },
+            "layout": { "height": 1, "width": "fill" },
+            "appearance": { "background": "setupCardStroke" }
+          },
+          {
             "id": "settings-expander-content",
             "el": "div",
-            "layout": { "mode": "vertical", "gap": "3", "padding": { "x": "4", "y": "3" }, "width": "fill" },
+            "layout": { "mode": "vertical", "gap": "0", "padding": "0", "width": "fill" },
             "children": [
-              { "id": "settings-expander-child", "component": "SettingsToggleRow", "props": { "title": "Allow network access", "detail": "Let sandboxed commands reach the network." } }
+              {
+                "id": "settings-expander-child",
+                "el": "div",
+                "layout": { "mode": "horizontal", "gap": "0", "padding": { "left": "4", "top": "4", "right": "settingsItemEnd", "bottom": "4" }, "align": "center", "width": "fill" },
+                "appearance": { "background": "$none", "borderWidth": 0, "textAlign": "left" },
+                "children": [
+                  {
+                    "id": "settings-expander-item-text",
+                    "el": "div",
+                    "layout": { "mode": "vertical", "gap": "0", "grow": true },
+                    "margin": { "right": "5" },
+                    "children": [
+                      { "id": "settings-expander-item-title", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "body", "color": "ink" }, "children": [ "Allow network access" ] },
+                      { "id": "settings-expander-item-detail", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "caption", "color": "muted" }, "children": [ "Let sandboxed commands reach the network." ] }
+                    ]
+                  },
+                  {
+                    "id": "settings-expander-item-control",
+                    "el": "div",
+                    "layout": { "mode": "horizontal", "align": "center", "justify": "center", "width": 40, "height": 36 },
+                    "children": [
+                      { "id": "settings-expander-item-switch", "component": "ToggleSwitch", "props": { "label": "Allow network access" } }
+                    ]
+                  }
+                ]
+              }
             ]
           }
         ]
@@ -3491,59 +3558,17 @@
     },
     {
       "name": "SettingsWindowShell",
-      "note": "Settings composite. The Settings host window frame (Windows/HubWindow.xaml). MinWidth 1000, Mica backdrop, title bar captioned \"OpenClaw Settings\". A left NavigationView rail (pane toggle and the stock settings item hidden) sits beside a scrolling content column padded token `5` (24px) with a MaxWidth of 900px (port note). The bottom of the window hosts a 40px status pill and a 40x40 toolbar button cluster. Composes SettingsSectionHeader and SettingsToggleRow; the nav items reuse the subtle-button interaction model.",
+      "note": "Settings composite, shown as a content-only window sample per user direction: no left navigation pane or hidden navigation keyboard stops. The full-width content column has 24px padding and a 4px card gap matching the supplied Windows Settings reference. General uses the shared semibold SettingsSectionHeader. SettingsToggleRow remains passive around its switch; SettingsExpanderRow has one actionable header and independently interactive expanded content. All settings text shares the iconless 16px left inset. Production Windows/HubWindow.xaml remains unchanged, including its NavigationView, MinWidth 1000, Mica backdrop, title bar, 900px maximum content width and bottom status/toolbar; this sample does not claim to reproduce the complete native window.",
       "root": {
         "id": "settings-window-root",
         "el": "section",
-        "layout": { "mode": "horizontal", "width": "fill" },
+        "layout": { "mode": "vertical", "width": "fill" },
         "appearance": { "background": "paper" },
         "children": [
           {
-            "id": "settings-window-nav",
-            "el": "nav",
-            "layout": { "mode": "vertical", "gap": "1", "padding": "2", "width": 240 },
-            "appearance": { "background": "surface", "borderColor": "line" },
-            "children": [
-              {
-                "id": "settings-window-nav-general",
-                "el": "button",
-                "attrs": { "type": "button", "aria-current": "page" },
-                "layout": { "mode": "horizontal", "gap": "2", "padding": { "x": "2", "y": "2" }, "align": "center", "width": "fill" },
-                "appearance": { "background": "subtleHover", "radius": "sm", "color": "ink" },
-                "control": { "chrome": "none", "focus": { "kind": "outline", "color": "accent" } },
-                "states": {
-                  "hover": { "background": "subtleHover" },
-                  "pressed": { "background": "subtlePressed" },
-                  "hoverPressed": { "background": "subtlePressed" }
-                },
-                "children": [
-                  { "id": "settings-window-nav-general-glyph", "el": "span", "attrs": { "aria-hidden": "true", "style": "font-family:'Segoe Fluent Icons','Segoe MDL2 Assets',sans-serif;font-size:16px" }, "appearance": { "color": "ink" }, "children": [ "\uE713" ] },
-                  { "id": "settings-window-nav-general-label", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "body", "color": "ink" }, "children": [ "General" ] }
-                ]
-              },
-              {
-                "id": "settings-window-nav-perms",
-                "el": "button",
-                "attrs": { "type": "button" },
-                "layout": { "mode": "horizontal", "gap": "2", "padding": { "x": "2", "y": "2" }, "align": "center", "width": "fill" },
-                "appearance": { "background": "$none", "radius": "sm", "color": "ink" },
-                "control": { "chrome": "none", "focus": { "kind": "outline", "color": "accent" } },
-                "states": {
-                  "hover": { "background": "subtleHover" },
-                  "pressed": { "background": "subtlePressed" },
-                  "hoverPressed": { "background": "subtlePressed" }
-                },
-                "children": [
-                  { "id": "settings-window-nav-perms-glyph", "el": "span", "attrs": { "aria-hidden": "true", "style": "font-family:'Segoe Fluent Icons','Segoe MDL2 Assets',sans-serif;font-size:16px" }, "appearance": { "color": "ink" }, "children": [ "\uE72E" ] },
-                  { "id": "settings-window-nav-perms-label", "el": "span", "appearance": { "fontFamily": "body", "textStyle": "body", "color": "ink" }, "children": [ "Permissions" ] }
-                ]
-              }
-            ]
-          },
-          {
             "id": "settings-window-content",
             "el": "div",
-            "layout": { "mode": "vertical", "gap": "2", "padding": "5", "grow": true, "width": "fill" },
+            "layout": { "mode": "vertical", "gap": "1", "padding": "5", "grow": true, "width": "fill" },
             "children": [
               { "id": "settings-window-section", "component": "SettingsSectionHeader", "props": { "children": "General" } },
               { "id": "settings-window-row-1", "component": "SettingsToggleRow" },
