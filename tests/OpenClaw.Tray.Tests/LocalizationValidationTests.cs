@@ -620,6 +620,78 @@ public class LocalizationValidationTests
         "fr-fr",
         "nl-nl",
         "pt-br",
+        "it-it",
+    };
+
+    /// <summary>
+    /// Keys whose English value is also the natural Italian UI term (loanwords such as
+    /// "Chat", "Gateway", "Token", "Privacy", "Home", or pure format strings). it-it may keep
+    /// the en-us value for these keys while the other locales translate them.
+    /// </summary>
+    private static readonly HashSet<string> ItalianLoanwordResourceKeys = new(StringComparer.Ordinal)
+    {
+        "SettingsTokenTextBox.Header",
+        "WindowTitle_Canvas",
+        "A2UI_CanvasTitle",
+        "Settings_PrivacyHeader",
+        "SettingsPrivacyHeader.Text",
+        "SettingsMcpEndpointLabel.Text",
+        "UrlApproval_HostFormat",
+        "AgentEventsPage_ToggleButton_43.Text",
+        "PermissionsPage_McpEndpointLabel.Text",
+        "ConfigPage_EditorLabel.Text",
+        "ConfigPage_TabViewItem_34.Text",
+        "DebugPage_TextBlock_8.Text",
+        "HubWindow_NavigationViewItem_79.Content",
+        "HubWindow_NavigationViewItem_82.Content",
+        "HubWindow_NavigationViewItemHeader_87.Content",
+        "HubWindow_NavigationViewItem_124.Content",
+        "VoiceSettingsPage_TtsProviderCombo.Header",
+        "Chat_Placement_Offline",
+        "AppNotification_ExecApprovalPending_UnknownChatLabel",
+        "AppNotification_RepeatedBadgeFormat",
+        "AppNotification_CronRunFailed_MessageFormat",
+        "NotificationsPage_MetadataGateway",
+        "NotificationsPage_MetadataSandbox",
+        "ChatPageHomeToolTip.Content",
+        "HubWindow_NavigationViewItem_Sandbox.Content",
+        "ConnectionPage_URLToken.Text",
+        "CronPage_PROMPTPAYLOAD.Text",
+        "SandboxPage_Desktop.Text",
+        "SessionTitle_ThreadGeneric",
+        "SessionTitle_Heartbeat",
+        "SessionTitle_Dreaming",
+        "SessionSubtitle_Account",
+        "SettingsPage_Chat.Text",
+        "SettingsPage_Privacy.Text",
+        "ConnectionStatusWindow_SharedGatewayToken.Header",
+        "AgentEventsPage_LiveText.Text",
+        "ConnectionPage_ClientSingular",
+        "ConnectionPage_PreviewGateway",
+        "ConnectionPage_PreviewToken",
+        "ConnectionPage_AuthModeBootstrap",
+        "ChannelsPage_FieldSigningSecret",
+        "ChannelsPage_HelpSlackSigningSecret",
+        "AgentEventsPage_Status_Live",
+        "AgentEventsPage_Status_Offline",
+        "ConfigPage_StatusValidationErrorMessageFormat",
+        "DebugPage_StatusGatewayFormat",
+        "SettingsPage_AppInfoLabel_Runtime.Text",
+        "SettingsPage_AppInfoLabel_Windows.Text",
+        "SettingsPage_AppInfoDashboard.Content",
+        "Chat_AssistantMedia_Audio",
+        "Chat_AssistantMedia_Video",
+        "Chat_AssistantMedia_File",
+        "LocalAiPage_EndpointLabel.Text",
+        "Migration_StoreNo",
+    };
+
+    // Locales that translate copy the other locales still defer in English
+    // (WorkspaceShell_*, V2_*, DiagnosticsPage_*, ...). For deferred keys these
+    // locales may differ from en-us while every other locale keeps English.
+    private static readonly HashSet<string> BeyondDeferredLocales = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "it-it",
     };
 
     private static bool IsInvariantOrDeferred(string key, string value) =>
@@ -799,7 +871,7 @@ public class LocalizationValidationTests
     public void AllSupportedLocaleDirectories_Exist()
     {
         var stringsDir = GetStringsDirectory();
-        string[] expected = ["en-us", "fr-fr", "nl-nl", "zh-cn", "zh-tw", "pt-br"];
+        string[] expected = ["en-us", "fr-fr", "nl-nl", "zh-cn", "zh-tw", "pt-br", "it-it"];
 
         foreach (var locale in expected)
         {
@@ -1106,6 +1178,19 @@ public class LocalizationValidationTests
 
             if (identicalLocales.Count != localeResw.Count)
             {
+                if (identicalLocales.Count == 1 && identicalLocales[0] == "it-it"
+                    && ItalianLoanwordResourceKeys.Contains(key))
+                    continue;
+
+                var deferredLocales = localeResw
+                    .Select(l => l.Locale)
+                    .Where(l => !BeyondDeferredLocales.Contains(l))
+                    .ToList();
+                if (IsInvariantOrDeferred(key, enValue)
+                    && identicalLocales.Count == deferredLocales.Count
+                    && deferredLocales.All(l => identicalLocales.Contains(l, StringComparer.OrdinalIgnoreCase)))
+                    continue;
+
                 // These ordinary words are spelled identically in these languages.
                 string[] naturalLoanwordLocales = key switch
                 {

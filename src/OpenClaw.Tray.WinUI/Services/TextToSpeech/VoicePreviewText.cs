@@ -18,6 +18,7 @@ internal static class VoicePreviewText
     {
         ["en"] = "Hello! This is your Companion speaking.",
         ["es"] = "¡Hola! Esta es la voz de tu Compañero.",
+        ["it"] = "Ciao! Sono il tuo Companion.",
         ["zh"] = "您好!我是您的 Companion。",
     };
 

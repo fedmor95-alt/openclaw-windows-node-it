@@ -12,6 +12,7 @@ OpenClaw Tray uses WinUI `.resw` resource files for localization. Windows automa
 | Brazilian Portuguese | `pt-br` | `Strings/pt-br/Resources.resw` |
 | Chinese (Simplified) | `zh-cn` | `Strings/zh-cn/Resources.resw` |
 | Chinese (Traditional) | `zh-tw` | `Strings/zh-tw/Resources.resw` |
+| Italian (Italy) | `it-it` | `Strings/it-it/Resources.resw` |
 
 ## Adding a New Language
 
@@ -74,7 +75,7 @@ Windows picks the language automatically based on the user's OS display language
 Set the `OPENCLAW_LANGUAGE` environment variable before launching the app:
 
 ```powershell
-$env:OPENCLAW_LANGUAGE = "fr-fr"  # or nl-nl, pt-br, zh-cn, zh-tw
+$env:OPENCLAW_LANGUAGE = "fr-fr"  # or nl-nl, pt-br, zh-cn, zh-tw, it-it
 .\run-app-local.ps1 -NoBuild
 ```
 

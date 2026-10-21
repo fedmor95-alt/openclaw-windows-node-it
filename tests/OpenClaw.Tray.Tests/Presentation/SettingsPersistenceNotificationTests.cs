@@ -200,7 +200,7 @@ public sealed class SettingsPersistenceNotificationTests
         var root = TestRepositoryPaths.GetRepositoryRoot();
         var paths = Directory.GetFiles(Path.Combine(root, "src", "OpenClaw.Tray.WinUI", "Strings"),
             "Resources.resw", SearchOption.AllDirectories);
-        Assert.Equal(6, paths.Length);
+        Assert.Equal(7, paths.Length);
         foreach (var path in paths)
         {
             var entries = XDocument.Load(path).Descendants("data");
