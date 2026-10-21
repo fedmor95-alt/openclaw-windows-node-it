@@ -1852,7 +1852,7 @@
     },
     {
       "name": "NotificationFlyout",
-      "note": "App notifications flyout from Controls/NotificationFlyoutContent.xaml (#1541), opened from the Workspace footer bell. The preview includes its presenter backplate: a surface sheet, 1px line frame, md (8px) corners, md drop shadow and 12px inset, consistent with the ConnectionStatusFlyout reference. Its 378px border box preserves the 352px content column. A transparent 32px outer margin leaves room for the shadow inside Colophon's overflow-clipped flyout portal; it is preview clearance, not native content padding or exact popup placement. Production keeps the stock FlyoutPresenter with FlyoutPresenterBackground (AcrylicInAppFillColorDefaultBrush), FlyoutBorderThemeBrush, FlyoutContentPadding and platform shadow; the solid surface and named shadow are browser approximations. The content has a right-aligned Clear all link, notification cards, and a footer pairing Open notifications with an active-count caption. Each card retains its surface panel, 1px line border, md radius and 12px padding, with a leading severity glyph, title/message/metadata stack and dismiss button. A recurrence count rides a warning Badge beside the title. An empty state swaps the list for a centered card. Severity glyphs are Segoe Fluent Icons in-app; previewed here with a stroked alert glyph.",
+      "note": "Populated state from Controls/NotificationFlyoutContent.xaml. Native presenter padding is 16,15,16,17, with a 1px flyoutStroke border, md corners and a 352px content column inside the 386px frame. flyoutFill maps the acrylic fallback, not the card brush. Native medium-shadow outside insets are 10,2,10,18; the flyout shadow token is a light CSS reference, not native composition proof. Notification cards preserve CardBackgroundFillColorDefaultBrush alpha through setupCardFill/setupCardStroke, 12px padding and 4px vertical margins; the ListView's -4px horizontal margin cancels each card's +4px margin. Columns are 11px apart; text stack gap is 3px. Title is Body Strong, severity and Cancel use native Fluent glyphs, and recurrence uses the caution background with 7,1 padding and 10px radius. Header/footer reuse HyperlinkButton with native 4,0 padding and transparent 1px borders. NotificationFlyoutEmpty shows the supplied screenshot's empty state. Acrylic noise, font rasterization, native shadow/dark recipe, high-contrast 2px presenter border, scrolling and notification actions remain unverified/native-owned; do not claim pixel identity.",
       "props": {
         "title": "Approval required",
         "message": "A Windows node capability is waiting for your approval.",
@@ -1864,18 +1864,18 @@
         "el": "div",
         "layout": {
           "mode": "vertical",
-          "gap": "2",
-          "padding": "3",
-          "width": 378
+          "gap": "0",
+          "padding": { "left": "4", "top": "flyoutTop", "right": "4", "bottom": "flyoutBottom" },
+          "width": 386
         },
-        "margin": "6",
+        "margin": { "left": "textControlLeft", "top": "half", "right": "textControlLeft", "bottom": "flyoutShadowBottom" },
         "appearance": {
-          "background": "surface",
-          "borderColor": "line",
+          "background": "flyoutFill",
+          "borderColor": "flyoutStroke",
           "borderWidth": 1,
-          "color": "ink",
+          "color": "nativeText",
           "radius": "md",
-          "shadow": "md"
+          "shadow": "flyout"
         },
         "children": [
           {
@@ -1883,44 +1883,19 @@
             "el": "div",
             "layout": {
               "mode": "horizontal",
-              "justify": "end",
-              "width": "fill"
+              "justify": "end"
             },
+            "margin": { "left": "half", "right": "half", "bottom": "2" },
             "children": [
               {
                 "id": "notif-clear",
-                "el": "button",
-                "attrs": {
-                  "type": "button"
-                },
-                "layout": {
-                  "mode": "horizontal",
-                  "align": "center",
-                  "padding": {
-                    "x": "2",
-                    "y": "1"
-                  },
-                  "width": "hug"
-                },
+                "component": "HyperlinkButton",
+                "props": { "children": "Clear all" },
                 "appearance": {
-                  "fontFamily": "body",
-                  "textStyle": "body",
-                  "color": "accent",
-                  "background": "$none",
-                  "radius": "sm"
-                },
-                "control": {
-                  "chrome": "none",
-                  "focus": { "kind": "outline", "color": "accent" }
-                },
-                "states": {
-                  "hover": { "background": "subtleHover" },
-                  "pressed": { "background": "subtlePressed" },
-                  "hoverPressed": { "background": "subtlePressed" }
-                },
-                "children": [
-                  "Clear all"
-                ]
+                  "color": "accentText",
+                  "borderColor": "subtleButtonBorder",
+                  "borderWidth": 1
+                }
               }
             ]
           },
@@ -1929,65 +1904,40 @@
             "el": "div",
             "layout": {
               "mode": "horizontal",
-              "gap": "3",
+              "gap": "buttonHorizontal",
               "padding": "3",
               "align": "start",
               "width": "fill"
             },
+            "margin": { "y": "1" },
             "appearance": {
-              "background": "surface",
-              "borderColor": "line",
-              "color": "ink",
+              "background": "setupCardFill",
+              "borderColor": "setupCardStroke",
+              "borderWidth": 1,
+              "color": "nativeText",
               "radius": "md"
             },
             "children": [
               {
                 "id": "notif-card-glyph",
-                "el": "svg",
+                "el": "span",
                 "attrs": {
-                  "width": "16",
-                  "height": "16",
-                  "viewBox": "0 0 24 24",
-                  "fill": "none",
-                  "stroke": "currentColor",
-                  "stroke-width": "2",
-                  "stroke-linecap": "round",
-                  "stroke-linejoin": "round",
                   "aria-hidden": "true"
                 },
+                "layout": { "width": 16, "height": 16 },
+                "margin": { "top": "half" },
                 "appearance": {
-                  "color": "warning"
+                  "textStyle": "chatIcon",
+                  "color": "nativeText"
                 },
-                "children": [
-                  {
-                    "id": "notif-card-glyph-tri",
-                    "el": "path",
-                    "attrs": {
-                      "d": "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
-                    }
-                  },
-                  {
-                    "id": "notif-card-glyph-line",
-                    "el": "path",
-                    "attrs": {
-                      "d": "M12 9v4"
-                    }
-                  },
-                  {
-                    "id": "notif-card-glyph-dot",
-                    "el": "path",
-                    "attrs": {
-                      "d": "M12 17h.01"
-                    }
-                  }
-                ]
+                "children": ["\uE7BA"]
               },
               {
                 "id": "notif-card-text",
                 "el": "div",
                 "layout": {
                   "mode": "vertical",
-                  "gap": "1",
+                  "gap": "notificationTextGap",
                   "grow": true
                 },
                 "children": [
@@ -2005,8 +1955,8 @@
                         "el": "span",
                         "appearance": {
                           "fontFamily": "body",
-                          "textStyle": "body",
-                          "color": "ink"
+                          "textStyle": "bodyStrong",
+                          "color": "nativeText"
                         },
                         "children": [
                           "{title}"
@@ -2016,8 +1966,17 @@
                         "id": "notif-card-count",
                         "component": "Badge",
                         "props": {
-                          "tone": "warning",
+                          "tone": "neutral",
                           "children": "{count}"
+                        },
+                        "layout": { "padding": { "x": "notificationBadgeX", "y": "notificationBadgeY" } },
+                        "appearance": {
+                          "fontFamily": "body",
+                          "textStyle": "caption",
+                          "background": "notificationBadgeFill",
+                          "color": "nativeText",
+                          "borderWidth": 0,
+                          "radius": "notificationBadge"
                         }
                       }
                     ]
@@ -2028,7 +1987,7 @@
                     "appearance": {
                       "fontFamily": "body",
                       "textStyle": "caption",
-                      "color": "ink"
+                      "color": "nativeText"
                     },
                     "children": [
                       "{message}"
@@ -2040,7 +1999,7 @@
                     "appearance": {
                       "fontFamily": "body",
                       "textStyle": "caption",
-                      "color": "muted"
+                      "color": "nativeSecondary"
                     },
                     "children": [
                       "{metadata}"
@@ -2050,9 +2009,9 @@
               },
               {
                 "id": "notif-card-dismiss",
-                "el": "div",
+                "el": "button",
                 "attrs": {
-                  "role": "button",
+                  "type": "button",
                   "title": "Dismiss",
                   "aria-label": "Dismiss notification"
                 },
@@ -2060,37 +2019,30 @@
                   "mode": "horizontal",
                   "align": "center",
                   "justify": "center",
+                  "padding": "textControlEnd",
                   "width": 30,
                   "height": 30
                 },
                 "appearance": {
-                  "color": "muted",
+                  "background": "$none",
+                  "borderWidth": 0,
+                  "color": "nativeText",
                   "radius": "sm"
+                },
+                "control": { "chrome": "none", "focus": { "kind": "outline", "color": "accent" } },
+                "states": {
+                  "hover": { "background": "buttonHoverFill", "color": "buttonHoverText" },
+                  "pressed": { "background": "buttonPressedFill", "color": "buttonPressedText" },
+                  "hoverPressed": { "background": "buttonPressedFill", "color": "buttonPressedText" },
+                  "disabled": { "background": "buttonDisabledFill", "color": "buttonDisabledText" }
                 },
                 "children": [
                   {
                     "id": "notif-card-dismiss-glyph",
-                    "el": "svg",
-                    "attrs": {
-                      "width": "12",
-                      "height": "12",
-                      "viewBox": "0 0 24 24",
-                      "fill": "none",
-                      "stroke": "currentColor",
-                      "stroke-width": "2",
-                      "stroke-linecap": "round",
-                      "stroke-linejoin": "round",
-                      "aria-hidden": "true"
-                    },
-                    "children": [
-                      {
-                        "id": "notif-card-dismiss-path",
-                        "el": "path",
-                        "attrs": {
-                          "d": "M18 6L6 18M6 6l12 12"
-                        }
-                      }
-                    ]
+                    "el": "span",
+                    "attrs": { "aria-hidden": "true" },
+                    "appearance": { "textStyle": "notificationDismissIcon" },
+                    "children": ["\uE711"]
                   }
                 ]
               }
@@ -2103,44 +2055,19 @@
               "mode": "horizontal",
               "gap": "2",
               "align": "center",
-              "justify": "space-between",
-              "width": "fill"
+              "justify": "space-between"
             },
+            "margin": { "left": "half", "top": "2", "right": "half" },
             "children": [
               {
                 "id": "notif-footer-open",
-                "el": "button",
-                "attrs": {
-                  "type": "button"
-                },
-                "layout": {
-                  "mode": "horizontal",
-                  "align": "center",
-                  "padding": {
-                    "x": "2",
-                    "y": "1"
-                  },
-                  "width": "hug"
-                },
+                "component": "HyperlinkButton",
+                "props": { "children": "Open notifications" },
                 "appearance": {
-                  "fontFamily": "body",
-                  "textStyle": "body",
-                  "color": "accent",
-                  "background": "$none",
-                  "radius": "sm"
-                },
-                "control": {
-                  "chrome": "none",
-                  "focus": { "kind": "outline", "color": "accent" }
-                },
-                "states": {
-                  "hover": { "background": "subtleHover" },
-                  "pressed": { "background": "subtlePressed" },
-                  "hoverPressed": { "background": "subtlePressed" }
-                },
-                "children": [
-                  "Open notifications"
-                ]
+                  "color": "accentText",
+                  "borderColor": "subtleButtonBorder",
+                  "borderWidth": 1
+                }
               },
               {
                 "id": "notif-footer-count",
@@ -2148,11 +2075,83 @@
                 "appearance": {
                   "fontFamily": "body",
                   "textStyle": "caption",
-                  "color": "muted"
+                  "color": "nativeTertiary"
                 },
                 "children": [
                   "1 active"
                 ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "NotificationFlyoutEmpty",
+      "note": "Empty state of the same native notification flyout, matching the user-supplied reference in .agents/design/reference/notification-native-empty.png. Keep the 386px presenter, 352px content column, 16,15,16,17 presenter padding and native card alpha. The collapsed Clear all button leaves an 8px header-grid margin. Empty card has 20px padding, 4px vertical margins, Body Strong title and Caption detail with a 6px gap; footer margin is 2,8,2,0. No severity glyph, recurrence badge, dismiss target or active count appears in this state. Content determines height; native acrylic noise, font metrics, shadow composition and actual popup positioning cannot be claimed pixel-identical from this source mapping.",
+      "root": {
+        "id": "notif-empty-root",
+        "el": "div",
+        "layout": {
+          "mode": "vertical",
+          "gap": "0",
+          "padding": { "left": "4", "top": "flyoutTop", "right": "4", "bottom": "flyoutBottom" },
+          "width": 386
+        },
+        "margin": { "left": "textControlLeft", "top": "half", "right": "textControlLeft", "bottom": "flyoutShadowBottom" },
+        "appearance": {
+          "background": "flyoutFill",
+          "borderColor": "flyoutStroke",
+          "borderWidth": 1,
+          "color": "nativeText",
+          "radius": "md",
+          "shadow": "flyout"
+        },
+        "children": [
+          {
+            "id": "notif-empty-header",
+            "el": "div",
+            "attrs": { "aria-hidden": "true" },
+            "layout": { "mode": "vertical" },
+            "margin": { "bottom": "2" }
+          },
+          {
+            "id": "notif-empty-card",
+            "el": "div",
+            "layout": { "mode": "vertical", "gap": "textControlEnd", "padding": "notificationEmpty", "width": "fill" },
+            "margin": { "y": "1" },
+            "appearance": {
+              "background": "setupCardFill",
+              "borderColor": "setupCardStroke",
+              "borderWidth": 1,
+              "radius": "md"
+            },
+            "children": [
+              {
+                "id": "notif-empty-title",
+                "el": "span",
+                "appearance": { "fontFamily": "body", "textStyle": "bodyStrong", "color": "nativeText" },
+                "children": ["No notifications"]
+              },
+              {
+                "id": "notif-empty-description",
+                "el": "p",
+                "appearance": { "fontFamily": "body", "textStyle": "caption", "color": "nativeSecondary" },
+                "children": ["New app notifications will appear here until you dismiss or clear them."]
+              }
+            ]
+          },
+          {
+            "id": "notif-empty-footer",
+            "el": "div",
+            "layout": { "mode": "horizontal", "align": "center" },
+            "margin": { "left": "half", "top": "2", "right": "half" },
+            "children": [
+              {
+                "id": "notif-empty-open",
+                "component": "HyperlinkButton",
+                "props": { "children": "Open notifications" },
+                "appearance": { "color": "accentText", "borderColor": "subtleButtonBorder", "borderWidth": 1 }
               }
             ]
           }

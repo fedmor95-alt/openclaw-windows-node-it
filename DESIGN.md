@@ -13,6 +13,11 @@ colors:
   accentText: "#003e92"
   setupCardFill: "#ffffffb3"
   setupCardStroke: "#0000000f"
+  flyoutFill: "#f9f9f9"
+  flyoutStroke: "#0000000f"
+  nativeSecondary: "#0000009e"
+  nativeTertiary: "#00000072"
+  notificationBadgeFill: "#fff4ce"
   setupOptionDisabled: "#f9f9f94d"
   providerArtworkFill: "#202020"
   providerArtworkStroke: "#00000019"
@@ -234,6 +239,11 @@ typography:
     fontSize: 13px
     fontWeight: 400
     lineHeight: 13px
+  notificationDismissIcon:
+    fontFamily: '"Segoe Fluent Icons", "Segoe MDL2 Assets", sans-serif'
+    fontSize: 11px
+    fontWeight: 400
+    lineHeight: 11px
 spacing:
   "0": 0px
   half: 2px
@@ -256,6 +266,13 @@ spacing:
   chatGutter: 40px
   workspaceSelectorEnd: 28px
   settingsItemEnd: 44px
+  flyoutTop: 15px
+  flyoutBottom: 17px
+  flyoutShadowBottom: 18px
+  notificationEmpty: 20px
+  notificationTextGap: 3px
+  notificationBadgeX: 7px
+  notificationBadgeY: 1px
 rounded:
   sm: 4px
   md: 8px
@@ -264,6 +281,7 @@ rounded:
   composer: 20px
   pill: 999px
   workspaceContent: 8px 0 0 0
+  notificationBadge: 10px
 x-colophon:
   version: 1
   tokens:
@@ -303,6 +321,7 @@ x-colophon:
           - SettingsExpanderRow
           - SettingsWindowShell
           - NotificationFlyout
+          - NotificationFlyoutEmpty
           - ConnectionStatusFlyout
           - WorkspaceShell
           - AgentIdentityBadge
@@ -359,6 +378,8 @@ x-colophon:
         value: 0 4px 16px rgba(0,0,0,0.12)
       - name: lg
         value: 0 12px 40px rgba(0,0,0,0.16)
+      - name: flyout
+        value: 0 8px 16px rgba(0,0,0,0.14)
     principles:
       - Defer to Windows. Theme off SystemAccentColor and Fluent resources so the app follows the user's accent, light/dark, and high-contrast choices.
       - One accent, and it means "act here". Selection, focus, and primary actions share the system accent; don't spend it on decoration.
@@ -400,6 +421,36 @@ x-colophon:
           dark: "#2b2b2b"
           highContrast: "#000000"
         usage: Cards, flyouts, inputs. Fluent CardBackgroundFillColorDefault.
+      flyoutFill:
+        resource: FlyoutPresenterBackground
+        themes:
+          dark: "#2c2c2c"
+          highContrast: "#000000"
+        usage: Native AcrylicInAppFillColorDefaultBrush fallback, not a card fill. Light fallback F9F9F9 and dark fallback 2C2C2C come from AcrylicBrush_themeresources.xaml. Browser preview does not reproduce backdrop blur or acrylic noise.
+      flyoutStroke:
+        resource: FlyoutBorderThemeBrush
+        themes:
+          dark: "#00000033"
+          highContrast: "#ffffff"
+        usage: SurfaceStrokeColorFlyoutBrush in light/dark; SystemColorWindowTextColorBrush in high contrast. Preserve alpha rather than using the generic line swatch.
+      nativeSecondary:
+        resource: TextFillColorSecondaryBrush
+        themes:
+          dark: "#ffffffc5"
+          highContrast: "#ffffff"
+        usage: Alpha-preserving secondary native text for notification details and metadata.
+      nativeTertiary:
+        resource: TextFillColorTertiaryBrush
+        themes:
+          dark: "#ffffff87"
+          highContrast: "#ffffff"
+        usage: Alpha-preserving tertiary native text for the active notification count.
+      notificationBadgeFill:
+        resource: SystemFillColorCautionBackgroundBrush
+        themes:
+          dark: "#433519"
+          highContrast: "#000000"
+        usage: Recurrence-count background, not the caution foreground color or a generic status pill.
       muted:
         resource: TextFillColorSecondaryBrush
         themes:
@@ -972,7 +1023,7 @@ The chat transcript and composer ship via Reactor and follow the native chat vis
 
 The chat reference was reconciled against production commit `9e4999c6d43f166437afa204a556bd8ee9dbfcb2`, including `ChatVisuals.cs`, `ReactorChatComposer.cs`, `ReactorChatTimeline.cs`, `ChatMarkdownPresentation.cs`, `ChatCopyButton.cs`, `FluentIconCatalog.cs` and `Themes/ChatResources.xaml`. A separately built ARM64 Release app ran against the isolated synthetic Gateway at 120 DPI; native screenshots and UI Automation bounds cover light/dark, empty/drafted input and the wide avatar breakpoint. This is fixture proof, not live Gateway/provider proof.
 
-The [120-DPI comparison](.agents/design/reference/chat-comparison.png) preserves the unmodified native and browser composer pixels at the same scale. Both writing surfaces are 960x140 physical pixels (768x112 effective pixels), with 40x40 action targets and a 55px input height. User-footer spacing includes 8px of stack space plus its 2px top margin. Schema/expansion checks cover all 38 components; focused chat geometry and action-state checks cover all three preview themes.
+The [120-DPI comparison](.agents/design/reference/chat-comparison.png) preserves the unmodified native and browser composer pixels at the same scale. Both writing surfaces are 960x140 physical pixels (768x112 effective pixels), with 40x40 action targets and a 55px input height. User-footer spacing includes 8px of stack space plus its 2px top margin. At capture time, schema/expansion checks covered all 38 definitions then present; focused chat geometry and action-state checks covered all three preview themes. This historical proof does not cover subsequently added examples.
 
 The Colophon catalog now uses the actual geometry, semantic alpha brushes and Fluent glyphs. It is **not a verified pixel-identical native renderer**: Mica is wallpaper/activation-dependent; this host's native UI Automation reports Segoe UI Variable while Chromium resolves the requested family to Segoe UI; and text rasterization/layout rounding differ. The installed schema also lacks responsive breakpoints, row-hover opacity, gradient elevation borders and native input/flyout behavior. Fixed-size references must not become production layout code. High-contrast preview swatches are resource simulations, not evidence of Windows HC mode.
 
@@ -984,20 +1035,43 @@ The landing window is the native Home and Sessions workspace (`Windows/Workspace
 - **Menu.** Home is a 36px row with 4px horizontal and 2px vertical outer margins, a 3x16 accent indicator and the original `Chat.svg` at 22px centered in a 24px column. The iconless native presenter reserves 8px before that column, followed by a 16px gap to Home. The Sessions header is 40px tall with 16px leading and 4px trailing insets, 14px semibold text, and a 40x36 add button. No conversations to show replaces session rows in the supplied state; add is disabled while disconnected.
 - **Owner footer.** The PaneFooter uses 4,8,4,8 margins and a 4px column gap. The Owner button is the shared `UserIdentityBadge`, with native SubtleButton states, 8px padding and a retained 1px border, a 24px PersonPicture, 12px column spacing and a 10px status dot followed by a 4px gap and Caption text. `statusTone` follows connection state, never authorization. It reads the authenticated `users.self` profile or falls back to Owner. The notification button is 40x36 with 8px padding, vertically centered against Owner, containing the original 20px `Notifications.svg` and a 16px InfoBadge offset -6px above and 8px beyond the icon's right edge.
 - **Connection status.** `Controls/GatewayStatusContent.xaml` is a 304px flyout of Gateway, Operator, and Node rows split by 1px `line` dividers, closing with an Open Connection link. Each row pairs a 10px status dot with a body-strong label over a caption `muted` detail, and reveals an `accent` action link (Reconnect, Approve) only when that layer needs one. The dot binds the Fluent system fill for its state: `positive` connected, `warning` attention, `critical` error, `muted` unknown, never color alone.
-- **Notifications.** `Controls/NotificationFlyoutContent.xaml` is a 352px content column: a Clear all link, a list of notification cards, and a footer pairing Open notifications with an active-count caption. The preview now includes a presenter backplate around the whole column, not just the individual cards: a `surface` fill, 1px `line` frame, `md` (8px) corners, `md` drop shadow and 12px inset. The 378px border box preserves the 352px content width. A transparent 32px outer margin gives the shadow room inside Colophon's overflow-clipped portal; this is preview clearance, not native content padding or exact popup placement. Each notification card retains its own `surface` panel, 1px `line` border, `md` corners, and 12px padding, laying out a severity glyph, title/message/metadata stack, and dismiss button; a recurrence count rides a `warning` badge beside the title. An empty state swaps the list for one centered card. Production keeps the stock [FlyoutPresenter](https://github.com/microsoft/microsoft-ui-xaml/blob/09cfc8ff3fbf556166dd813ae9b81646716f54bf/controls/dev/CommonStyles/FlyoutPresenter_themeresources.xaml): bind `FlyoutPresenterBackground`, `FlyoutBorderThemeBrush`, `FlyoutContentPadding` and the native platform shadow rather than copying the solid browser sheet or shadow values. The browser's 12px inset approximates native 16,15,16,17 padding, and its 1px frame does not simulate the native 2px high-contrast override.
+- **Notifications.** `NotificationFlyout` and `NotificationFlyoutEmpty` map the populated and empty states of `Controls/NotificationFlyoutContent.xaml`. They retain separate presenter and card layers, native alpha, and exact authored spacing. See the notification mapping below; the former generic `surface`/`line` shell and 12px presenter inset were incorrect.
 - **Artwork and glyphs.** Pane, Back, Forward and Add use actual Segoe Fluent glyphs U+E90C, U+E76B, U+E76C and U+E710 at 16px, not hand-drawn SVG substitutes. Home and Notifications use exact production SVG bytes, including their authored gradients; these are artwork, not theme-color tokens. The title uses `BrandAssets.RedBotMarkUri` at 16px with a 16px gap before its 12px title. Native caption glyph references are U+E921, U+E922 and U+E8BB. The owner fallback uses PersonPicture's Contact glyph U+E77B at 24 * 0.42 = 10.08px.
 - **Content.** One `NavigationViewContentBackground` layer uses `chatLayer`, with a 1px top/left `line` stroke and the native 8,0,0,0 corner shape (`workspaceContent`). The disconnected placeholder is centered: U+E8F2 at 48px, Subtitle text, and the standard 32px Open Connection button, separated by 12px gaps.
 
 Workspace button instances reuse SubtleButton's resource-bound states rather than a generic `muted` foreground. The added `workspaceTitle`, `workspacePerson` and `workspacePlaceholder` typography tokens preserve native title, PersonPicture and empty-state metrics. `workspaceSelectorEnd` records the 28px native selector padding.
 
-This is a production-structure and geometry reference, not a pixel-identity claim. The supplied screenshot's client is approximately 1266x852 effective pixels; the preview uses that height and follows its available width. Mica's wallpaper tint, font rasterization, OS caption actions and native NavigationView interaction cannot be reproduced by this renderer. The pane button has hover/pressed/focus styling, but collapse/reopen remains a native action: production hides the pane entirely, shows a 56px ReopenPaneSlot, and transfers focus. Do not approximate that behavior by shrinking focusable children to zero width. The preview notification button opens the shared illustrative flyout; it does not read live notifications.
+This is a production-structure and geometry reference, not a pixel-identity claim. The supplied screenshot's client is approximately 1266x852 effective pixels; the preview uses that height and follows its available width. Mica's wallpaper tint, font rasterization, OS caption actions and native NavigationView interaction cannot be reproduced by this renderer. The pane button has hover/pressed/focus styling, but collapse/reopen remains a native action: production hides the pane entirely, shows a 56px ReopenPaneSlot, and transfers focus. Do not approximate that behavior by shrinking focusable children to zero width. The preview notification button opens the shared populated flyout; the empty reference is a separate Settings example. Neither reads live notifications.
+
+### Notification presenter and card mapping
+
+The [user-supplied native empty-state capture](.agents/design/reference/notification-native-empty.png) is the visual target, not a screenshot of this browser preview. Its approximately 482px outer width and 440px card width are consistent with native 386px and 352px widths at 125% scale.
+
+| Part | Native mapping retained in the preview |
+| --- | --- |
+| Presenter | `FlyoutPresenterBackground` (`AcrylicInAppFillColorDefaultBrush`), `FlyoutBorderThemeBrush`, 1px light/dark border, 8px `OverlayCornerRadius` |
+| Presenter padding | 16,15,16,17, exactly `FlyoutContentPadding`; outer width 386 = 352 + 16 + 16 + 1 + 1 |
+| Card fill and frame | Existing `setupCardFill` / `setupCardStroke`, which bind the same native card brushes. Light fill is white at B3/FF alpha, not opaque white or the generic `surface` swatch |
+| Clear-all row | Margin 2,0,2,8; shared HyperlinkButton with native 4,0 content padding and a retained transparent 1px border |
+| Populated card | Padding 12; vertical margin 4. Native ListView margin -4 and card margin +4 cancel horizontally, leaving a 352px-wide card |
+| Populated columns | 16px native severity glyph, 11px column gaps, Body Strong title, Caption message/metadata, 3px text-stack gaps; native Cancel glyph U+E711 at 11px in a 30px dismiss target |
+| Recurrence badge | Caution background, primary text, 10px radius, exact 7,1 padding; no generic warning foreground or pill padding |
+| Empty card | Padding 20, vertical margin 4, left-aligned Body Strong title and Caption description separated by 6px |
+| Empty header | The collapsed Clear all button leaves its parent Grid's 8px bottom margin; do not remove that spacer |
+| Footer | Margin 2,8,2,0; shared Open notifications link and native tertiary count. Empty state has no count |
+
+The [native acrylic dictionary](https://github.com/microsoft/microsoft-ui-xaml/blob/09cfc8ff3fbf556166dd813ae9b81646716f54bf/controls/dev/Materials/Acrylic/AcrylicBrush_themeresources.xaml) defines the light fallback as F9F9F9 and dark fallback as 2C2C2C. Sampling the supplied screenshot's blank presenter area gives mainly 249-250 per channel; its white card is mainly 253-254. Compositing the native B3-alpha white card over F9F9F9 gives approximately 253, preserving the small native contrast without inventing another gray panel.
+
+The named `flyout` shadow uses an 8px downward offset, 16px CSS blur and 14% black as a light-preview reference. The [native popup's medium shadow clearance](https://github.com/microsoft/microsoft-ui-xaml/blob/09cfc8ff3fbf556166dd813ae9b81646716f54bf/dxaml/xcp/components/graphics/ThemeShadow.cpp) is 10,2,10,18; the preview reserves those same outside insets instead of the old 32px margin. These insets are separate from content padding. Colophon's portal still positions its entire scroll box, including clearance, rather than anchoring the presenter like WinUI.
+
+**Pixel identity remains unverified.** The flat fallback cannot reproduce acrylic noise/backdrop composition, Chromium text measurement/rasterization differs from WinUI, and a CSS shadow is not the native composition shadow (including its dark-theme recipe). The empty example is content-sized, not forced to a screenshot height. The native high-contrast presenter uses a 2px border, while this schema keeps the authored 1px border. The exact resource and authored geometry mappings above are not a substitute for a same-scale native/browser image comparison. Production keeps the stock [FlyoutPresenter](https://github.com/microsoft/microsoft-ui-xaml/blob/09cfc8ff3fbf556166dd813ae9b81646716f54bf/controls/dev/CommonStyles/FlyoutPresenter_themeresources.xaml) and system resources; no application or installed-plugin code is changed.
 
 ## Components
 
 Reuse [component patterns](.agents/design/components.jsonc); these describe design intent, not shipping code.
 Optional click-through flows live in `.agents/design/prototypes.jsonc`.
 
-The catalog is organized into four families through `x-colophon.tokens.pages` above. The entry with `id: components` selects the built-in Components page; Setup, Chat, and Settings select their feature-specific previews. Each of the 38 definitions has exactly one standalone page assignment: Components 15, Setup 6, Chat 7, and Settings 10. Page selections do not copy or remove definitions, so shared controls still resolve inside compositions and flyouts. Keep control examples and variants beside their basic control, not on another feature page. The old synthetic Connection example screen and separate RecommendedBadge definition have been removed.
+The catalog is organized into four families through `x-colophon.tokens.pages` above. The entry with `id: components` selects the built-in Components page; Setup, Chat, and Settings select their feature-specific previews. Each of the 39 definitions has exactly one standalone page assignment: Components 15, Setup 6, Chat 7, and Settings 11. Page selections do not copy or remove definitions, so shared controls still resolve inside compositions and flyouts. Keep control examples and variants beside their basic control, not on another feature page. The old synthetic Connection example screen and separate RecommendedBadge definition have been removed.
 
 Every interactive control documents its hover and pressed states; static controls say so. States bind Fluent resources (`SubtleFillColorSecondary` for hover, `SubtleFillColorTertiary` for pressed, accent variants for primary actions), never raw hex.
 
@@ -1006,7 +1080,7 @@ ComposerPickerOptions rows use full-row `subtleHover` and `subtlePressed` fills 
 - **Basic controls and their examples (15).** Button (accent), ButtonStandard (normal), SubtleButton (native default style), HyperlinkButton, TextBox, Field, Badge, BadgeAccent, ToggleSwitch, StatusDot, Avatar, AvatarStates, InfoBar, InfoBarStates, and Card. ButtonStandard references Button and overrides its state brushes, just as BadgeAccent references Badge; neither duplicates shared markup. TextBox is the reusable default WinUI single-line input. Field composes a label and TextBox; its Gateway address example passes the label and placeholder into that shared control. AvatarStates and InfoBarStates demonstrate their parent control's presentations, not separate app features.
 - **Setup (6).** SetupProgressIndicator, ProviderArtwork, SetupOptionCard, CapabilityOptionRow, SetupPhaseStatus, and the SetupWizardShell frame, ported from `OpenClaw.SetupEngine.UI`. Recommended labels reuse BadgeAccent from Components.
 - **Chat (7).** ChatBubble (assistant prose), ChatUserBubble (sent user message), ChatComposer, ChatThread, ComposerPicker, ComposerPickerOptions, and ChatCopyButton. See the Chat surface section.
-- **Settings and workspace (10).** SettingsSectionHeader, SettingsCard, SettingsToggleRow, SettingsExpanderRow, and SettingsWindowShell, plus the native workspace identity controls (AgentIdentityBadge, UserIdentityBadge), ConnectionStatusFlyout, NotificationFlyout, and WorkspaceShell. These come from `OpenClaw.Tray.WinUI` pages, `HubWindow`, and `WorkspaceWindow`. See the Workspace shell section.
+- **Settings and workspace (11).** SettingsSectionHeader, SettingsCard, SettingsToggleRow, SettingsExpanderRow, and SettingsWindowShell, plus the native workspace identity controls (AgentIdentityBadge, UserIdentityBadge), ConnectionStatusFlyout, NotificationFlyout, NotificationFlyoutEmpty, and WorkspaceShell. These come from `OpenClaw.Tray.WinUI` pages, `HubWindow`, and `WorkspaceWindow`. See the Workspace shell section.
 
 TextBox ships as the stock `Microsoft.UI.Xaml.Controls.TextBox`, as used by `DirectUrlBox` in `Pages/ConnectionPage.xaml`, not a custom control template. The Colophon preview uses 14px body text, 32px single-line height, `sm` corners, exact text-control padding, pointer-over and disabled resource tokens, and the accent focus underline. WinUI has no separate pressed background for the input itself; pressing enters its focused state. The browser preview approximates the native elevation border with `controlLine` and does not reproduce the native focused-fill transition or clear-button template.
 
